@@ -4,6 +4,8 @@
 #include "stdafx.h"
 #include "Xmouse.h"
 
+#include <Xinput.h>
+
 #define MAX_LOADSTRING 100
 
 // Global Variables:
@@ -24,8 +26,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 {
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
-
-    // TODO: Place code here.
 
     // Initialize global strings
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
@@ -97,8 +97,8 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
    hInst = hInstance; // Store instance handle in our global variable
 
-   HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-      CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
+   HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
+      CW_USEDEFAULT, 0, 1250, 800, nullptr, nullptr, hInstance, nullptr);
 
    if (!hWnd)
    {
@@ -144,9 +144,25 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     case WM_PAINT:
         {
-            PAINTSTRUCT ps;
-            HDC hdc = BeginPaint(hWnd, &ps);
-            // TODO: Add any drawing code that uses hdc here...
+			PAINTSTRUCT     ps;
+			HDC             hdc;
+			BITMAP          bitmap;
+			HDC             hdcMem;
+			HGDIOBJ         oldBitmap;
+
+            hdc = BeginPaint(hWnd, &ps);
+			
+			HBITMAP hBitmap = (HBITMAP)LoadImage(hInst, L"controller.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+
+			hdcMem = CreateCompatibleDC(hdc);
+			oldBitmap = SelectObject(hdcMem, hBitmap);
+
+			GetObject(hBitmap, sizeof(BITMAP), &bitmap);
+			BitBlt(hdc, 0, 0, bitmap.bmWidth, bitmap.bmHeight, hdcMem, 0, 0, SRCCOPY);
+
+			SelectObject(hdcMem, oldBitmap);
+			DeleteDC(hdcMem);
+
             EndPaint(hWnd, &ps);
         }
         break;
