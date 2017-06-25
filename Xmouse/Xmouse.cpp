@@ -5,6 +5,7 @@
 #include "Xmouse.h"
 
 #include <Xinput.h>
+#include <stdio.h>
 
 #define MAX_LOADSTRING 100
 
@@ -18,6 +19,8 @@ ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
+
+// item
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -111,6 +114,21 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    return TRUE;
 }
 
+/*
+function:	addMenuItems(HWND, const WCHAR *[], int)
+
+purpose:	adds menu items to a combo box
+
+params:		HWND cbox - combo box to add items to
+			const WCHAR *[] menuItems - items to add to box
+			int itemCount - number of items being added
+*/
+void addMenuItems(HWND cbox, const WCHAR *menuItems[], int itemCount)
+{
+	for (int i = 0; i < itemCount; ++i)
+		SendMessage(cbox, CB_ADDSTRING, 0, (LPARAM)menuItems[i]);
+}
+
 //
 //  FUNCTION: WndProc(HWND, UINT, WPARAM, LPARAM)
 //
@@ -138,6 +156,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	*/
 	case WM_CREATE:
 		{
+			// create menu items to be added to each combo box
+			const WCHAR *stickBoxItems[] = { L"Mouse", L"Scroll", L"Inverted Scroll" };
+			int stickBoxItemCount = sizeof(stickBoxItems) / sizeof(const WCHAR *);
+
+			const WCHAR *triggerBoxItems[] = { L"Speed Up Mouse", L"Speed Up Scroll" };
+			int triggerBoxItemCount = sizeof(triggerBoxItems) / sizeof(const WCHAR *);
+			
+			const WCHAR *buttonBoxItems[] = { L"Left Click", L"Right Click", L"Keyboard", L"Show Desktop", L"Next Window", L"Previous Window", L"Browser Back", L"Browser Forward", L"Start Menu" };
+			int buttonBoxItemCount = sizeof(buttonBoxItems) / sizeof(const WCHAR *);
+
+			// create combo boxes for each button and stick on the controller
+
 			HWND leftStickBox = CreateWindow(
 				L"COMBOBOX",  // Predefined class; Unicode assumed
 				L"OK",      // Box text
@@ -145,7 +175,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				136,         // x position
 				274,         // y position
 				150,        // Box width
-				10,        // Box height
+				500,        // Box height
 				hWnd,     // Parent window
 				NULL,       // No menu.
 				(HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE),
@@ -171,7 +201,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				88,         // x position
 				403,         // y position
 				150,        // Box width
-				10,        // Box height
+				500,        // Box height
 				hWnd,     // Parent window
 				NULL,       // No menu.
 				(HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE),
@@ -184,7 +214,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				302,         // x position
 				603,         // y position
 				150,        // Box width
-				10,        // Box height
+				500,        // Box height
 				hWnd,     // Parent window
 				NULL,       // No menu.
 				(HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE),
@@ -197,7 +227,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				81,         // x position
 				463,         // y position
 				150,        // Box width
-				10,        // Box height
+				500,        // Box height
 				hWnd,     // Parent window
 				NULL,       // No menu.
 				(HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE),
@@ -210,7 +240,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				568,         // x position
 				587,         // y position
 				150,        // Box width
-				10,        // Box height
+				500,        // Box height
 				hWnd,     // Parent window
 				NULL,       // No menu.
 				(HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE),
@@ -223,7 +253,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				990,         // x position
 				401,         // y position
 				150,        // Box width
-				10,        // Box height
+				500,        // Box height
 				hWnd,     // Parent window
 				NULL,       // No menu.
 				(HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE),
@@ -236,7 +266,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				985,         // x position
 				358,         // y position
 				150,        // Box width
-				10,        // Box height
+				500,        // Box height
 				hWnd,     // Parent window
 				NULL,       // No menu.
 				(HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE),
@@ -249,7 +279,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				971,         // x position
 				315,         // y position
 				150,        // Box width
-				10,        // Box height
+				500,        // Box height
 				hWnd,     // Parent window
 				NULL,       // No menu.
 				(HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE),
@@ -262,7 +292,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				958,         // x position
 				272,         // y position
 				150,        // Box width
-				10,        // Box height
+				500,        // Box height
 				hWnd,     // Parent window
 				NULL,       // No menu.
 				(HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE),
@@ -275,7 +305,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				166,         // x position
 				150,         // y position
 				150,        // Box width
-				10,        // Box height
+				500,        // Box height
 				hWnd,     // Parent window
 				NULL,       // No menu.
 				(HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE),
@@ -288,7 +318,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				203,         // x position
 				44,         // y position
 				150,        // Box width
-				10,        // Box height
+				500,        // Box height
 				hWnd,     // Parent window
 				NULL,       // No menu.
 				(HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE),
@@ -301,7 +331,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				916,         // x position
 				158,         // y position
 				150,        // Box width
-				10,        // Box height
+				500,        // Box height
 				hWnd,     // Parent window
 				NULL,       // No menu.
 				(HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE),
@@ -314,7 +344,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				894,         // x position
 				44,         // y position
 				150,        // Box width
-				10,        // Box height
+				500,        // Box height
 				hWnd,     // Parent window
 				NULL,       // No menu.
 				(HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE),
@@ -327,7 +357,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				624,         // x position
 				148,         // y position
 				150,        // Box width
-				10,        // Box height
+				500,        // Box height
 				hWnd,     // Parent window
 				NULL,       // No menu.
 				(HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE),
@@ -340,11 +370,31 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				459,         // x position
 				148,         // y position
 				150,        // Box width
-				10,        // Box height
+				500,        // Box height
 				hWnd,     // Parent window
 				NULL,       // No menu.
 				(HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE),
 				NULL);      // Pointer not needed.
+
+			// add the correct menu options for each box
+			addMenuItems(leftStickBox, stickBoxItems, stickBoxItemCount);
+			addMenuItems(rightStickBox, stickBoxItems, stickBoxItemCount);
+
+			addMenuItems(upBox, buttonBoxItems, buttonBoxItemCount);
+			addMenuItems(downBox, buttonBoxItems, buttonBoxItemCount);
+			addMenuItems(leftBox, buttonBoxItems, buttonBoxItemCount);
+			addMenuItems(rightBox, buttonBoxItems, buttonBoxItemCount);
+			addMenuItems(aBox, buttonBoxItems, buttonBoxItemCount);
+			addMenuItems(bBox, buttonBoxItems, buttonBoxItemCount);
+			addMenuItems(xBox, buttonBoxItems, buttonBoxItemCount);
+			addMenuItems(yBox, buttonBoxItems, buttonBoxItemCount);
+			addMenuItems(leftBumperBox, buttonBoxItems, buttonBoxItemCount);
+			addMenuItems(rightBumperBox, buttonBoxItems, buttonBoxItemCount);
+			addMenuItems(startBox, buttonBoxItems, buttonBoxItemCount);
+			addMenuItems(selectBox, buttonBoxItems, buttonBoxItemCount);
+
+			addMenuItems(leftTriggerBox, triggerBoxItems, triggerBoxItemCount);
+			addMenuItems(rightTriggerBox, triggerBoxItems, triggerBoxItemCount);
 
 		}
 		break;
