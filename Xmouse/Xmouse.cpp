@@ -5,7 +5,9 @@
 #include "Xmouse.h"
 
 #include <Xinput.h>
-#include <stdio.h>
+
+#include "ControlCodes.h"
+#include "ControlProfile.h"
 
 #define MAX_LOADSTRING 100
 
@@ -13,6 +15,8 @@
 HINSTANCE hInst;                                // current instance
 WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
 WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
+
+HWND controlBoxes[CONTROL_COUNT];				// array holding the combo boxes for all the controls
 
 // Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -166,235 +170,64 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			const WCHAR *buttonBoxItems[] = { L"Left Click", L"Right Click", L"Keyboard", L"Show Desktop", L"Next Window", L"Previous Window", L"Browser Back", L"Browser Forward", L"Start Menu" };
 			int buttonBoxItemCount = sizeof(buttonBoxItems) / sizeof(const WCHAR *);
 
-			// create combo boxes for each button and stick on the controller
-
-			HWND leftStickBox = CreateWindow(
-				L"COMBOBOX",  // Predefined class; Unicode assumed
-				L"OK",      // Box text
-				WS_TABSTOP | WS_VISIBLE | WS_CHILD | CBS_DROPDOWN,  // Styles
-				136,         // x position
-				274,         // y position
-				150,        // Box width
-				500,        // Box height
-				hWnd,     // Parent window
-				NULL,       // No menu.
-				(HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE),
-				NULL);      // Pointer not needed.
-
-			HWND rightStickBox = CreateWindow(
-				L"COMBOBOX",  // Predefined class; Unicode assumed
-				L"OK",      // Box text
-				WS_TABSTOP | WS_VISIBLE | WS_CHILD | CBS_DROPDOWN,  // Styles
-				776,         // x position
-				606,         // y position
-				150,        // Box width
-				10,        // Box height
-				hWnd,     // Parent window
-				NULL,       // No menu.
-				(HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE),
-				NULL);      // Pointer not needed.
-
-			HWND upBox = CreateWindow(
-				L"COMBOBOX",  // Predefined class; Unicode assumed
-				L"OK",      // Box text
-				WS_TABSTOP | WS_VISIBLE | WS_CHILD | CBS_DROPDOWN,  // Styles
-				88,         // x position
-				403,         // y position
-				150,        // Box width
-				500,        // Box height
-				hWnd,     // Parent window
-				NULL,       // No menu.
-				(HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE),
-				NULL);      // Pointer not needed.
-
-			HWND downBox = CreateWindow(
-				L"COMBOBOX",  // Predefined class; Unicode assumed
-				L"OK",      // Box text
-				WS_TABSTOP | WS_VISIBLE | WS_CHILD | CBS_DROPDOWN,  // Styles
-				302,         // x position
-				603,         // y position
-				150,        // Box width
-				500,        // Box height
-				hWnd,     // Parent window
-				NULL,       // No menu.
-				(HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE),
-				NULL);      // Pointer not needed.
-
-			HWND leftBox = CreateWindow(
-				L"COMBOBOX",  // Predefined class; Unicode assumed
-				L"OK",      // Box text
-				WS_TABSTOP | WS_VISIBLE | WS_CHILD | CBS_DROPDOWN,  // Styles
-				81,         // x position
-				463,         // y position
-				150,        // Box width
-				500,        // Box height
-				hWnd,     // Parent window
-				NULL,       // No menu.
-				(HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE),
-				NULL);      // Pointer not needed.
-
-			HWND rightBox = CreateWindow(
-				L"COMBOBOX",  // Predefined class; Unicode assumed
-				L"OK",      // Box text
-				WS_TABSTOP | WS_VISIBLE | WS_CHILD | CBS_DROPDOWN,  // Styles
-				568,         // x position
-				587,         // y position
-				150,        // Box width
-				500,        // Box height
-				hWnd,     // Parent window
-				NULL,       // No menu.
-				(HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE),
-				NULL);      // Pointer not needed.
-
-			HWND aBox = CreateWindow(
-				L"COMBOBOX",  // Predefined class; Unicode assumed
-				L"OK",      // Box text
-				WS_TABSTOP | WS_VISIBLE | WS_CHILD | CBS_DROPDOWN,  // Styles
-				990,         // x position
-				401,         // y position
-				150,        // Box width
-				500,        // Box height
-				hWnd,     // Parent window
-				NULL,       // No menu.
-				(HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE),
-				NULL);      // Pointer not needed.
-
-			HWND bBox = CreateWindow(
-				L"COMBOBOX",  // Predefined class; Unicode assumed
-				L"OK",      // Box text
-				WS_TABSTOP | WS_VISIBLE | WS_CHILD | CBS_DROPDOWN,  // Styles
-				985,         // x position
-				358,         // y position
-				150,        // Box width
-				500,        // Box height
-				hWnd,     // Parent window
-				NULL,       // No menu.
-				(HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE),
-				NULL);      // Pointer not needed.
-
-			HWND xBox = CreateWindow(
-				L"COMBOBOX",  // Predefined class; Unicode assumed
-				L"OK",      // Box text
-				WS_TABSTOP | WS_VISIBLE | WS_CHILD | CBS_DROPDOWN,  // Styles
-				971,         // x position
-				315,         // y position
-				150,        // Box width
-				500,        // Box height
-				hWnd,     // Parent window
-				NULL,       // No menu.
-				(HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE),
-				NULL);      // Pointer not needed.
-
-			HWND yBox = CreateWindow(
-				L"COMBOBOX",  // Predefined class; Unicode assumed
-				L"OK",      // Box text
-				WS_TABSTOP | WS_VISIBLE | WS_CHILD | CBS_DROPDOWN,  // Styles
-				958,         // x position
-				272,         // y position
-				150,        // Box width
-				500,        // Box height
-				hWnd,     // Parent window
-				NULL,       // No menu.
-				(HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE),
-				NULL);      // Pointer not needed.
-
-			HWND leftBumperBox = CreateWindow(
-				L"COMBOBOX",  // Predefined class; Unicode assumed
-				L"OK",      // Box text
-				WS_TABSTOP | WS_VISIBLE | WS_CHILD | CBS_DROPDOWN,  // Styles
-				166,         // x position
-				150,         // y position
-				150,        // Box width
-				500,        // Box height
-				hWnd,     // Parent window
-				NULL,       // No menu.
-				(HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE),
-				NULL);      // Pointer not needed.
-
-			HWND leftTriggerBox = CreateWindow(
-				L"COMBOBOX",  // Predefined class; Unicode assumed
-				L"OK",      // Box text
-				WS_TABSTOP | WS_VISIBLE | WS_CHILD | CBS_DROPDOWN,  // Styles
-				203,         // x position
-				44,         // y position
-				150,        // Box width
-				500,        // Box height
-				hWnd,     // Parent window
-				NULL,       // No menu.
-				(HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE),
-				NULL);      // Pointer not needed.
-
-			HWND rightBumperBox = CreateWindow(
-				L"COMBOBOX",  // Predefined class; Unicode assumed
-				L"OK",      // Box text
-				WS_TABSTOP | WS_VISIBLE | WS_CHILD | CBS_DROPDOWN,  // Styles
-				916,         // x position
-				158,         // y position
-				150,        // Box width
-				500,        // Box height
-				hWnd,     // Parent window
-				NULL,       // No menu.
-				(HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE),
-				NULL);      // Pointer not needed.
-
-			HWND rightTriggerBox = CreateWindow(
-				L"COMBOBOX",  // Predefined class; Unicode assumed
-				L"OK",      // Box text
-				WS_TABSTOP | WS_VISIBLE | WS_CHILD | CBS_DROPDOWN,  // Styles
-				894,         // x position
-				44,         // y position
-				150,        // Box width
-				500,        // Box height
-				hWnd,     // Parent window
-				NULL,       // No menu.
-				(HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE),
-				NULL);      // Pointer not needed.
-
-			HWND startBox = CreateWindow(
-				L"COMBOBOX",  // Predefined class; Unicode assumed
-				L"OK",      // Box text
-				WS_TABSTOP | WS_VISIBLE | WS_CHILD | CBS_DROPDOWN,  // Styles
-				624,         // x position
-				148,         // y position
-				150,        // Box width
-				500,        // Box height
-				hWnd,     // Parent window
-				NULL,       // No menu.
-				(HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE),
-				NULL);      // Pointer not needed.
-
-			HWND selectBox = CreateWindow(
-				L"COMBOBOX",  // Predefined class; Unicode assumed
-				L"OK",      // Box text
-				WS_TABSTOP | WS_VISIBLE | WS_CHILD | CBS_DROPDOWN,  // Styles
-				459,         // x position
-				148,         // y position
-				150,        // Box width
-				500,        // Box height
-				hWnd,     // Parent window
-				NULL,       // No menu.
-				(HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE),
-				NULL);      // Pointer not needed.
+			// store the (x,y) coordinates of each box in order *see ControlCodes.h
+			int controlBoxCoords[16][2] =
+			{	{ 136,274 },	// left stick
+				{ 776,606 },	// right stick
+				{ 88,403 },		// up
+				{ 302,603 },	// down
+				{ 81,463 },		// left
+				{ 568,587 },	// right
+				{ 990,401 },	// a
+				{ 985,358 },	// b
+				{ 971,315 },	// x
+				{ 958,272 },	// y
+				{ 166,150 },	// left bumper
+				{ 203,44 },		// left trigger
+				{ 916,158 },	// right bumper
+				{ 894,44 },		// right trigger
+				{ 624,148 },	// start
+				{ 459,148 } };	// select
+			
+			// create combo boxes for each control in controlBoxes
+			
+			for (int i = 0; i < CONTROL_COUNT; ++i)
+			{
+				controlBoxes[i] = CreateWindow(
+					L"COMBOBOX",										// Predefined class; Unicode assumed
+					L"OK",												// Box text
+					WS_TABSTOP | WS_VISIBLE | WS_CHILD | CBS_DROPDOWN,  // Styles
+					controlBoxCoords[i][0],								// x position
+					controlBoxCoords[i][1],								// y position
+					150,												// Box width
+					500,												// Box height
+					hWnd,												// Parent window
+					NULL,												// No menu.
+					(HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE),		// Handle to instance
+					NULL);												// Pointer not needed.
+			}
 
 			// add the correct menu options for each box
-			addMenuItems(leftStickBox, stickBoxItems, stickBoxItemCount);
-			addMenuItems(rightStickBox, stickBoxItems, stickBoxItemCount);
+			
+			addMenuItems(controlBoxes[LEFT_STICK], stickBoxItems, stickBoxItemCount);
+			addMenuItems(controlBoxes[RIGHT_STICK], stickBoxItems, stickBoxItemCount);
 
-			addMenuItems(upBox, buttonBoxItems, buttonBoxItemCount);
-			addMenuItems(downBox, buttonBoxItems, buttonBoxItemCount);
-			addMenuItems(leftBox, buttonBoxItems, buttonBoxItemCount);
-			addMenuItems(rightBox, buttonBoxItems, buttonBoxItemCount);
-			addMenuItems(aBox, buttonBoxItems, buttonBoxItemCount);
-			addMenuItems(bBox, buttonBoxItems, buttonBoxItemCount);
-			addMenuItems(xBox, buttonBoxItems, buttonBoxItemCount);
-			addMenuItems(yBox, buttonBoxItems, buttonBoxItemCount);
-			addMenuItems(leftBumperBox, buttonBoxItems, buttonBoxItemCount);
-			addMenuItems(rightBumperBox, buttonBoxItems, buttonBoxItemCount);
-			addMenuItems(startBox, buttonBoxItems, buttonBoxItemCount);
-			addMenuItems(selectBox, buttonBoxItems, buttonBoxItemCount);
+			addMenuItems(controlBoxes[UP], buttonBoxItems, buttonBoxItemCount);
+			addMenuItems(controlBoxes[DOWN], buttonBoxItems, buttonBoxItemCount);
+			addMenuItems(controlBoxes[LEFT], buttonBoxItems, buttonBoxItemCount);
+			addMenuItems(controlBoxes[RIGHT], buttonBoxItems, buttonBoxItemCount);
+			addMenuItems(controlBoxes[A], buttonBoxItems, buttonBoxItemCount);
+			addMenuItems(controlBoxes[B], buttonBoxItems, buttonBoxItemCount);
+			addMenuItems(controlBoxes[X], buttonBoxItems, buttonBoxItemCount);
+			addMenuItems(controlBoxes[Y], buttonBoxItems, buttonBoxItemCount);
+			addMenuItems(controlBoxes[LEFT_BUMPER], buttonBoxItems, buttonBoxItemCount);
+			addMenuItems(controlBoxes[RIGHT_BUMPER], buttonBoxItems, buttonBoxItemCount);
+			addMenuItems(controlBoxes[START], buttonBoxItems, buttonBoxItemCount);
+			addMenuItems(controlBoxes[SELECT], buttonBoxItems, buttonBoxItemCount);
 
-			addMenuItems(leftTriggerBox, triggerBoxItems, triggerBoxItemCount);
-			addMenuItems(rightTriggerBox, triggerBoxItems, triggerBoxItemCount);
+			addMenuItems(controlBoxes[LEFT_TRIGGER], triggerBoxItems, triggerBoxItemCount);
+			addMenuItems(controlBoxes[RIGHT_TRIGGER], triggerBoxItems, triggerBoxItemCount);
+			
 
 		}
 		break;
