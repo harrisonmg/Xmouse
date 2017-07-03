@@ -195,7 +195,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			{
 				controlBoxes[i] = CreateWindow(
 					L"COMBOBOX",										// Predefined class; Unicode assumed
-					L"OK",												// Box text
+					NULL,												// Deafult box text (none)
 					WS_TABSTOP | WS_VISIBLE | WS_CHILD | CBS_DROPDOWN,  // Styles
 					controlBoxCoords[i][0],								// x position
 					controlBoxCoords[i][1],								// y position
@@ -203,7 +203,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					500,												// Box height
 					hWnd,												// Parent window
 					NULL,												// No menu.
-					(HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE),		// Handle to instance
+					hInst,												// Handle to instance
 					NULL);												// Pointer not needed.
 			}
 
