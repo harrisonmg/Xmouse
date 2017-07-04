@@ -9,16 +9,16 @@ class ControlProfile
 private:
 
 	HWND *controlBoxes;
-	int controlCount;
+	std::wstring roamingPath;
 
 public:
 
 	ControlProfile(HWND*);
 
 	// save controls to ini file
-	void saveProfile(std::wstring);
+	void saveProfile(std::wstring, bool showMessage = TRUE);
 	// load controls from ini file
-	void loadProfile(std::wstring);
+	void loadProfile(std::wstring, bool showMessage = TRUE);
 };
 
 #endif
