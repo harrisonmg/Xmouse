@@ -13,8 +13,8 @@
 
 // Global Variables:
 HINSTANCE hInst;                                // current instance
-WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
-WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
+wchar_t szTitle[MAX_LOADSTRING];                  // The title bar text
+wchar_t szWindowClass[MAX_LOADSTRING];            // the main window class name
 
 HWND controlBoxes[CONTROL_COUNT];				// array holding the combo boxes for all the controls
 
@@ -119,15 +119,15 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 }
 
 /*
-function:	addMenuItems(HWND, const WCHAR *[], int)
+function:	addMenuItems(HWND, const wchar_t *[], int)
 
 purpose:	adds menu items to a combo box
 
 params:		HWND cbox - combo box to add items to
-			const WCHAR *[] menuItems - items to add to box
+			const wchar_t *[] menuItems - items to add to box
 			int itemCount - number of items being added
 */
-void addMenuItems(HWND cbox, const WCHAR *menuItems[], int itemCount)
+void addMenuItems(HWND cbox, const wchar_t *menuItems[], int itemCount)
 {
 	for (int i = 0; i < itemCount; ++i)
 		SendMessage(cbox, CB_ADDSTRING, 0, (LPARAM)menuItems[i]);
@@ -161,14 +161,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_CREATE:
 		{
 			// create menu items to be added to each combo box
-			const WCHAR *stickBoxItems[] = { L"Mouse", L"Scroll", L"Inverted Scroll" };
-			int stickBoxItemCount = sizeof(stickBoxItems) / sizeof(const WCHAR *);
+			// ensure the index of each menu item is in accordance with the appropriate code in ControlCodes.h
+			const wchar_t *stickBoxItems[] = { L"Nothing", L"Mouse", L"Scroll", L"Inverted Scroll" };
+			int stickBoxItemCount = sizeof(stickBoxItems) / sizeof(const wchar_t *);
 
-			const WCHAR *triggerBoxItems[] = { L"Speed Up Mouse", L"Speed Up Scroll" };
-			int triggerBoxItemCount = sizeof(triggerBoxItems) / sizeof(const WCHAR *);
+			const wchar_t *triggerBoxItems[] = { L"Nothing", L"Speed Up Mouse", L"Speed Up Scroll" };
+			int triggerBoxItemCount = sizeof(triggerBoxItems) / sizeof(const wchar_t *);
 			
-			const WCHAR *buttonBoxItems[] = { L"Left Click", L"Right Click", L"Keyboard", L"Show Desktop", L"Next Window", L"Previous Window", L"Browser Back", L"Browser Forward", L"Start Menu" };
-			int buttonBoxItemCount = sizeof(buttonBoxItems) / sizeof(const WCHAR *);
+			const wchar_t *buttonBoxItems[] = { L"Nothing", L"Left Click", L"Right Click", L"Show Keyboard", L"Show Desktop", L"Next Window", L"Previous Window", L"Browser Back", L"Browser Forward", L"Start Menu" };
+			int buttonBoxItemCount = sizeof(buttonBoxItems) / sizeof(const wchar_t *);
 
 			// store the (x,y) coordinates of each box in order *see ControlCodes.h
 			int controlBoxCoords[16][2] =
@@ -194,17 +195,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			for (int i = 0; i < CONTROL_COUNT; ++i)
 			{
 				controlBoxes[i] = CreateWindow(
-					L"COMBOBOX",										// Predefined class; Unicode assumed
-					NULL,												// Deafult box text (none)
-					WS_TABSTOP | WS_VISIBLE | WS_CHILD | CBS_DROPDOWN,  // Styles
-					controlBoxCoords[i][0],								// x position
-					controlBoxCoords[i][1],								// y position
-					150,												// Box width
-					500,												// Box height
-					hWnd,												// Parent window
-					NULL,												// No menu.
-					hInst,												// Handle to instance
-					NULL);												// Pointer not needed.
+					L"COMBOBOX",											// Predefined class; Unicode assumed
+					NULL,													// Deafult box text (none)
+					WS_TABSTOP | WS_VISIBLE | WS_CHILD | CBS_DROPDOWNLIST,  // Styles
+					controlBoxCoords[i][0],									// x position
+					controlBoxCoords[i][1],									// y position
+					150,													// Box width
+					500,													// Box height
+					hWnd,													// Parent window
+					NULL,													// No menu.
+					hInst,													// Handle to instance
+					NULL);													// Pointer not needed.
 			}
 
 			// add the correct menu options for each box
@@ -228,7 +229,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			addMenuItems(controlBoxes[LEFT_TRIGGER], triggerBoxItems, triggerBoxItemCount);
 			addMenuItems(controlBoxes[RIGHT_TRIGGER], triggerBoxItems, triggerBoxItemCount);
 			
-
+			ControlProfile *ctrlProf = new ControlProfile(controlBoxes);
 		}
 		break;
     case WM_COMMAND:

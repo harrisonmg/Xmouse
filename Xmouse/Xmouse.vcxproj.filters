@@ -30,12 +30,21 @@
     <ClInclude Include="Xmouse.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ControlCodes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ControlProfile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Xmouse.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ControlProfile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
