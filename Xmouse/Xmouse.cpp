@@ -7,6 +7,7 @@
 #include <Xinput.h>
 #include <ShlObj.h>
 #include <Commdlg.h>
+#include <Shlwapi.h>
 
 #include "ControlCodes.h"
 #include "ControlProfile.h"
@@ -278,12 +279,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			// initialize control profile
 			ctrlProf = new ControlProfile(controlBoxes);
 
-			// set defaults for each control box
-			for (int i = 0; i < CONTROL_COUNT; ++i)
-				SendMessage(controlBoxes[i], CB_SETCURSEL, 0, 0);
+			// load last config, default config, or create default config, in order depending on existence
+			if (PathFileExists((roamingPath + L"LastConfig.ini").c_str()))
+				ctrlProf->loadProfile(roamingPath.c_str(), L"LastConfig", FALSE);
+			else if (PathFileExists((roamingPath + L"DefaultConfig.ini").c_str()))
+				ctrlProf->loadProfile(roamingPath.c_str(), L"DefaultConfig", FALSE);
+			else
+			{
+				// set defaults for each control box
+				int defaultControlValues[] = { 1,2,3,4,7,8,1,2,2,1,6,1,5,2,9,4 };
+				for (int i = 0; i < CONTROL_COUNT; ++i)
+					SendMessage(controlBoxes[i], CB_SETCURSEL, defaultControlValues[i], 0);
 
-			// save the current settings as the profile "Default", don't show message
-			ctrlProf->saveProfile(roamingPath.c_str(), L"Default", FALSE);
+				// save the current settings as the profile "Default", don't show message
+				ctrlProf->saveProfile(roamingPath.c_str(), L"DefaultConfig", FALSE);
+			}
 		}
 		break;
     case WM_COMMAND:
@@ -379,6 +389,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         break;
     case WM_DESTROY:
+		ctrlProf->saveProfile(roamingPath.c_str(), L"LastConfig", FALSE);
         PostQuitMessage(0);
         break;
     default:
