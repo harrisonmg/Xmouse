@@ -10,22 +10,9 @@
 ControlProfile::ControlProfile(HWND *controlBoxes)
 {
 	this->controlBoxes = controlBoxes;
-
-	// find path of AppData\Roaming and create the Xmouse folder in it
-	LPWSTR wszPath = NULL;
-	SHGetKnownFolderPath(FOLDERID_RoamingAppData, 0, NULL, &wszPath);
-	roamingPath = (std::wstring) wszPath + L"\\Xmouse\\";
-	CreateDirectory(roamingPath.c_str(), NULL);
-
-	// set defaults for each control box
-	for (int i = 0; i < CONTROL_COUNT; ++i)
-		SendMessage(controlBoxes[i], CB_SETCURSEL, 0, 0);
-
-	// save the current settings as the profile "Default"
-	this->saveProfile(L"Default", FALSE);
 }
 
-void ControlProfile::saveProfile(std::wstring profileName, bool showMessage)
+void ControlProfile::saveProfile(std::wstring roamingPath, std::wstring profileName, bool showMessage)
 {
 	std::wstring path = roamingPath + profileName + L".ini";
 
@@ -55,7 +42,7 @@ void ControlProfile::saveProfile(std::wstring profileName, bool showMessage)
 	}
 }
 
-void ControlProfile::loadProfile(std::wstring profileName, bool showMessage)
+void ControlProfile::loadProfile(std::wstring roamingPath, std::wstring profileName, bool showMessage)
 {
 	std::wstring path = roamingPath + profileName + L".ini";
 

@@ -10,6 +10,10 @@
 #define IDD_ABOUTBOX			103
 #define IDM_ABOUT				104
 #define IDM_EXIT				105
+
+#define IDM_SAVE_PROFILE		110
+#define IDM_LOAD_PROFILE		111
+
 #define IDI_XMOUSE			107
 #define IDI_SMALL				108
 #define IDC_XMOUSE			109

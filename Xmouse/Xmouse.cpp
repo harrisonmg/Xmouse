@@ -5,18 +5,29 @@
 #include "Xmouse.h"
 
 #include <Xinput.h>
+#include <ShlObj.h>
+#include <Commdlg.h>
 
 #include "ControlCodes.h"
 #include "ControlProfile.h"
 
 #define MAX_LOADSTRING 100
 
-// Global Variables:
-HINSTANCE hInst;                                // current instance
-wchar_t szTitle[MAX_LOADSTRING];                  // The title bar text
-wchar_t szWindowClass[MAX_LOADSTRING];            // the main window class name
+#define EXIT_HOTKEY 1						// code for exit hotkey
 
-HWND controlBoxes[CONTROL_COUNT];				// array holding the combo boxes for all the controls
+// window dimensions
+#define WND_WIDTH 1250
+#define WND_HEIGHT 800
+
+// Global Variables:
+HINSTANCE hInst;							// current instance
+wchar_t szTitle[MAX_LOADSTRING];			// The title bar text
+wchar_t szWindowClass[MAX_LOADSTRING];		// the main window class name
+
+HWND controlBoxes[CONTROL_COUNT];			// array holding the combo boxes for all the controls
+
+std::wstring roamingPath;					// path to Xmouse folder in AppData/Roaming
+ControlProfile *ctrlProf;
 
 // Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -104,8 +115,8 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
    hInst = hInstance; // Store instance handle in our global variable
 
-   HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
-      CW_USEDEFAULT, 0, 1250, 800, nullptr, nullptr, hInstance, nullptr);
+   HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | CW_USEDEFAULT,
+	   GetSystemMetrics(SM_CXSCREEN) / 2 - WND_WIDTH / 2, GetSystemMetrics(SM_CYSCREEN) / 2 - WND_HEIGHT / 2, WND_WIDTH, WND_HEIGHT, nullptr, nullptr, hInstance, nullptr);
 
    if (!hWnd)
    {
@@ -158,8 +169,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		}
 		break;
 	*/
+	case WM_HOTKEY:
+		{
+		if (wParam == EXIT_HOTKEY)
+			SendMessage(hWnd, WM_DESTROY, 0, 0);
+		}
+		break;
 	case WM_CREATE:
 		{
+			// create exit hotkey (ctrl + w)
+			RegisterHotKey(hWnd, EXIT_HOTKEY, MOD_CONTROL | MOD_NOREPEAT, 0x57 /*w key*/);
+
 			// create menu items to be added to each combo box
 			// ensure the index of each menu item is in accordance with the appropriate code in ControlCodes.h
 			const wchar_t *stickBoxItems[] = { L"Nothing", L"Mouse", L"Scroll", L"Inverted Scroll" };
@@ -229,7 +249,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			addMenuItems(controlBoxes[LEFT_TRIGGER], triggerBoxItems, triggerBoxItemCount);
 			addMenuItems(controlBoxes[RIGHT_TRIGGER], triggerBoxItems, triggerBoxItemCount);
 			
-			ControlProfile *ctrlProf = new ControlProfile(controlBoxes);
+			// find path of AppData\Roaming and create the Xmouse folder in it
+			LPWSTR wszPath = NULL;
+			SHGetKnownFolderPath(FOLDERID_RoamingAppData, 0, NULL, &wszPath);
+			roamingPath = (std::wstring) wszPath + L"\\Xmouse\\";
+			CreateDirectory(roamingPath.c_str(), NULL);
+
+			// initialize control profile
+			ctrlProf = new ControlProfile(controlBoxes);
+
+			// set defaults for each control box
+			for (int i = 0; i < CONTROL_COUNT; ++i)
+				SendMessage(controlBoxes[i], CB_SETCURSEL, 0, 0);
+
+			// save the current settings as the profile "Default", don't show message
+			ctrlProf->saveProfile(roamingPath.c_str(), L"Default", FALSE);
 		}
 		break;
     case WM_COMMAND:
@@ -244,6 +278,57 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             case IDM_EXIT:
                 DestroyWindow(hWnd);
                 break;
+			case IDM_SAVE_PROFILE:
+			{
+				OPENFILENAME ofn;
+				wchar_t szFilePath[MAX_PATH] = L"";
+
+				ZeroMemory(&ofn, sizeof(ofn));
+
+				ofn.lStructSize = sizeof(ofn); // SEE NOTE BELOW
+				ofn.hwndOwner = hWnd;
+				ofn.lpstrFilter = L"Config Settings Files (*.ini)\0*.ini\0";
+				ofn.lpstrFile = szFilePath;
+				ofn.nMaxFile = MAX_PATH;
+				ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
+				ofn.lpstrDefExt = L"ini";
+
+				// change working dir to default location of INIs
+				_wchdir(roamingPath.c_str());
+				if (GetSaveFileName(&ofn))
+				{
+					wchar_t profileName[MAX_PATH];
+					_wsplitpath_s(szFilePath, NULL, NULL, NULL, NULL, profileName, MAX_PATH, NULL, NULL);
+					ctrlProf->saveProfile(roamingPath, profileName);
+				}
+			}
+				break;
+			case IDM_LOAD_PROFILE:
+			{
+				OPENFILENAME ofn;
+				wchar_t szFilePath[MAX_PATH] = L"";
+
+				ZeroMemory(&ofn, sizeof(ofn));
+
+				ofn.lStructSize = sizeof(ofn); // SEE NOTE BELOW
+				ofn.hwndOwner = hWnd;
+				ofn.lpstrFilter = L"Config Settings Files (*.ini)\0*.ini\0";
+				ofn.lpstrFile = szFilePath;
+				ofn.nMaxFile = MAX_PATH;
+				ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
+				ofn.lpstrDefExt = L"ini";
+
+				// change working dir to default location of INIs
+				_wchdir(roamingPath.c_str());
+				if (GetOpenFileName(&ofn))
+				{
+					wchar_t profileName[MAX_PATH];
+					_wsplitpath_s(szFilePath, NULL, NULL, NULL, NULL, profileName, MAX_PATH, NULL, NULL);
+					ctrlProf->loadProfile(roamingPath, profileName);
+					// TODO: APPLY CHANGES
+				}
+			}
+				break;
             default:
                 return DefWindowProc(hWnd, message, wParam, lParam);
             }
