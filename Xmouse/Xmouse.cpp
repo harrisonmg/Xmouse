@@ -157,22 +157,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)
     {
-//	/*
-	case WM_LBUTTONDOWN:
-		{
-		int x = LOWORD(lParam);
-		int y = HIWORD(lParam);
-		wchar_t waCoord[20];
-		wsprintf(waCoord, _T("(%i, %i)"), x, y);
-		::MessageBox(hWnd, waCoord, _T("LMB Click"), MB_OK);
-		}
-		break;
-//	*/
-	case WM_APPLY_CONTROLS:
-		{
-		ctrlProf->mapControls();
-		}
-		break;
 	case WM_CREATE:
 		{
 			// create menu items to be added to each combo box
@@ -210,7 +194,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				controlBoxes[i] = CreateWindow(
 					L"COMBOBOX",											// Predefined class; Unicode assumed
 					NULL,													// Deafult box text (none)
-					WS_TABSTOP | WS_VISIBLE | WS_CHILD | CBS_DROPDOWNLIST,  // Styles
+					WS_VISIBLE | WS_CHILD | CBS_DROPDOWNLIST,  // Styles
 					controlBoxCoords[i][0],									// x position
 					controlBoxCoords[i][1],									// y position
 					150,													// Box width
@@ -254,7 +238,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 				// save the current settings as the profile "Default", don't show message
 				ctrlProf->saveProfile(roamingPath.c_str(), L"DefaultConfig", FALSE);
+				ctrlProf->mapControls();
 			}
+
+			// create apply button
+			RECT rect;
+			GetClientRect(hWnd, &rect);
+
+			CreateWindow(L"BUTTON", L"Apply",
+				WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
+				rect.right - rect.left - 110,
+				rect.bottom - rect.top - 40,
+				100, 30,
+				hWnd, NULL, hInst, NULL);
 		}
 		break;
     case WM_COMMAND:
@@ -316,10 +312,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					wchar_t profileName[MAX_PATH];
 					_wsplitpath_s(szFilePath, NULL, NULL, NULL, NULL, profileName, MAX_PATH, NULL, NULL);
 					ctrlProf->loadProfile(roamingPath, profileName);
-					ctrlProf->mapControls();
 				}
 			}
 				break;
+			case IDM_APPLY_CONTROLS:
+			{
+				ctrlProf->mapControls();
+			}
+				break;
+			case IDM_RESET_CONTROLS:
+			{
+				for (int i = 0; i < CONTROL_COUNT; ++i)
+					SendMessage(controlBoxes[i], CB_SETCURSEL, 0, 0);
+				ctrlProf->mapControls();
+			}
+			break;
             default:
                 return DefWindowProc(hWnd, message, wParam, lParam);
             }

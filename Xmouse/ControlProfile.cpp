@@ -72,6 +72,7 @@ void ControlProfile::loadProfile(std::wstring roamingPath, std::wstring profileN
 		std::wstring successMessage = L"The profile " + profileName + L" has been loaded.";
 		::MessageBox(GetParent(controlBoxes[0]), successMessage.c_str(), _T("Profile Loaded"), MB_OK);
 	}
+	mapControls();
 }
 
 void ControlProfile::mapControls()
