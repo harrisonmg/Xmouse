@@ -14,11 +14,6 @@
 
 #define MAX_LOADSTRING 100
 
-// hotkey codes
-#define EXIT_HOTKEY 0
-#define SAVE_HOTKEY 1
-#define LOAD_HOTKEY 2
-
 // window dimensions
 #define WND_WIDTH 1250
 #define WND_HEIGHT 800
@@ -178,34 +173,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		ctrlProf->mapControls();
 		}
 		break;
-	case WM_HOTKEY:
-		{
-		switch (wParam)
-		{
-			case EXIT_HOTKEY:
-				if (GetActiveWindow() == hWnd)
-					SendMessage(hWnd, WM_DESTROY, 0, 0);
-				break;
-			case SAVE_HOTKEY:
-				if (GetActiveWindow() == hWnd)
-					SendMessage(hWnd, WM_COMMAND, IDM_SAVE_PROFILE, 0);
-				break;
-			case LOAD_HOTKEY:
-				if (GetActiveWindow() == hWnd)
-					SendMessage(hWnd, WM_COMMAND, IDM_LOAD_PROFILE, 0);
-				break;
-			default:
-				break;
-		}
-		}
-		break;
 	case WM_CREATE:
 		{
-			// register hotkeys
-			RegisterHotKey(hWnd, EXIT_HOTKEY, MOD_CONTROL | MOD_NOREPEAT, 0x57 /*w key*/);
-			RegisterHotKey(hWnd, SAVE_HOTKEY, MOD_CONTROL | MOD_NOREPEAT, 0x53 /*s key*/);
-			RegisterHotKey(hWnd, LOAD_HOTKEY, MOD_CONTROL | MOD_NOREPEAT, 0x4C /*l key*/);
-
 			// create menu items to be added to each combo box
 			// ensure the index of each menu item is in accordance with the appropriate code in ControlCodes.h
 			const wchar_t *stickBoxItems[] = { L"Nothing", L"Mouse", L"Scroll", L"Inverted Scroll" };
