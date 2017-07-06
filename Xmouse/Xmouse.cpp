@@ -250,7 +250,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				rect.right - rect.left - 110,
 				rect.bottom - rect.top - 40,
 				100, 30,
-				hWnd, NULL, hInst, NULL);
+				hWnd, (HMENU) IDM_APPLY_CONTROLS, hInst, NULL);
 		}
 		break;
     case WM_COMMAND:
