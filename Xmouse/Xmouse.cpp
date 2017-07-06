@@ -162,7 +162,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)
     {
-	/*
+//	/*
 	case WM_LBUTTONDOWN:
 		{
 		int x = LOWORD(lParam);
@@ -172,7 +172,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		::MessageBox(hWnd, waCoord, _T("LMB Click"), MB_OK);
 		}
 		break;
-	*/
+//	*/
+	case WM_APPLY_CONTROLS:
+		{
+		ctrlProf->mapControls();
+		}
+		break;
 	case WM_HOTKEY:
 		{
 		switch (wParam)
@@ -205,11 +210,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			// ensure the index of each menu item is in accordance with the appropriate code in ControlCodes.h
 			const wchar_t *stickBoxItems[] = { L"Nothing", L"Mouse", L"Scroll", L"Inverted Scroll" };
 			int stickBoxItemCount = sizeof(stickBoxItems) / sizeof(const wchar_t *);
-
-			const wchar_t *triggerBoxItems[] = { L"Nothing", L"Speed Up Mouse", L"Speed Up Scroll" };
-			int triggerBoxItemCount = sizeof(triggerBoxItems) / sizeof(const wchar_t *);
 			
-			const wchar_t *buttonBoxItems[] = { L"Nothing", L"Left Click", L"Right Click", L"Show Keyboard", L"Show Desktop", L"Next Window", L"Previous Window", L"Browser Back", L"Browser Forward", L"Start Menu" };
+			const wchar_t *buttonBoxItems[] = { L"Nothing", L"Left Click", L"Right Click", L"Show Keyboard", L"Show Desktop",
+				L"Next Window", L"Previous Window",L"Browser Back", L"Browser Forward", L"Start Menu", L"Speed Up Mouse", L"Speed Up Scroll" };
 			int buttonBoxItemCount = sizeof(buttonBoxItems) / sizeof(const wchar_t *);
 
 			// store the (x,y) coordinates of each box in order *see ControlCodes.h
@@ -254,22 +257,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			addMenuItems(controlBoxes[LEFT_STICK], stickBoxItems, stickBoxItemCount);
 			addMenuItems(controlBoxes[RIGHT_STICK], stickBoxItems, stickBoxItemCount);
 
-			addMenuItems(controlBoxes[UP], buttonBoxItems, buttonBoxItemCount);
-			addMenuItems(controlBoxes[DOWN], buttonBoxItems, buttonBoxItemCount);
-			addMenuItems(controlBoxes[LEFT], buttonBoxItems, buttonBoxItemCount);
-			addMenuItems(controlBoxes[RIGHT], buttonBoxItems, buttonBoxItemCount);
-			addMenuItems(controlBoxes[A], buttonBoxItems, buttonBoxItemCount);
-			addMenuItems(controlBoxes[B], buttonBoxItems, buttonBoxItemCount);
-			addMenuItems(controlBoxes[X], buttonBoxItems, buttonBoxItemCount);
-			addMenuItems(controlBoxes[Y], buttonBoxItems, buttonBoxItemCount);
-			addMenuItems(controlBoxes[LEFT_BUMPER], buttonBoxItems, buttonBoxItemCount);
-			addMenuItems(controlBoxes[RIGHT_BUMPER], buttonBoxItems, buttonBoxItemCount);
-			addMenuItems(controlBoxes[START], buttonBoxItems, buttonBoxItemCount);
-			addMenuItems(controlBoxes[SELECT], buttonBoxItems, buttonBoxItemCount);
+			for (int i = 2; i < CONTROL_COUNT; ++i)
+			{
+				addMenuItems(controlBoxes[i], buttonBoxItems, buttonBoxItemCount);
+			}
 
-			addMenuItems(controlBoxes[LEFT_TRIGGER], triggerBoxItems, triggerBoxItemCount);
-			addMenuItems(controlBoxes[RIGHT_TRIGGER], triggerBoxItems, triggerBoxItemCount);
-			
 			// find path of AppData\Roaming and create the Xmouse folder in it
 			LPWSTR wszPath = NULL;
 			SHGetKnownFolderPath(FOLDERID_RoamingAppData, 0, NULL, &wszPath);
@@ -287,7 +279,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			else
 			{
 				// set defaults for each control box
-				int defaultControlValues[] = { 1,2,3,4,7,8,1,2,2,1,6,1,5,2,9,4 };
+				int defaultControlValues[] = { 1,2,3,4,7,8,1,2,2,1,6,10,5,11,9,4 };
 				for (int i = 0; i < CONTROL_COUNT; ++i)
 					SendMessage(controlBoxes[i], CB_SETCURSEL, defaultControlValues[i], 0);
 
@@ -355,7 +347,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					wchar_t profileName[MAX_PATH];
 					_wsplitpath_s(szFilePath, NULL, NULL, NULL, NULL, profileName, MAX_PATH, NULL, NULL);
 					ctrlProf->loadProfile(roamingPath, profileName);
-					// TODO: APPLY CHANGES
+					ctrlProf->mapControls();
 				}
 			}
 				break;

@@ -3,6 +3,9 @@
 // Used by Xmouse.rc
 //
 
+// message code for applying control settings
+#define WM_APPLY_CONTROLS (WM_USER + 0x0001)
+
 #define IDS_APP_TITLE			103
 
 #define IDR_MAINFRAME			128

@@ -73,3 +73,20 @@ void ControlProfile::loadProfile(std::wstring roamingPath, std::wstring profileN
 		::MessageBox(GetParent(controlBoxes[0]), successMessage.c_str(), _T("Profile Loaded"), MB_OK);
 	}
 }
+
+void ControlProfile::mapControls()
+{
+	int selectionIndex;
+	for (int i = 0; i < CONTROL_COUNT; ++i)
+	{
+		if ((selectionIndex = SendMessage(controlBoxes[i], CB_GETCURSEL, 0, 0)) == CB_ERR)
+		{
+			::MessageBox(GetParent(controlBoxes[0]), _T("Invalid control selected"), _T("Error Applying Controls"), MB_OK);
+			break;
+		}
+		else
+		{
+			controlMap[i] = selectionIndex;
+		}
+	}
+}

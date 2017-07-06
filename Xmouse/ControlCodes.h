@@ -28,9 +28,6 @@
 #define SCROLL 2
 #define INVERTED_SCROLL 3
 
-#define SPEED_UP_MOUSE 1
-#define SPEED_UP_SCROLL 2
-
 #define LEFT_CLICK 1
 #define RIGHT_CLICK 2
 #define SHOW_KEYBOARD 3
@@ -39,5 +36,7 @@
 #define BROWSER_BACK 6
 #define BROWSER_FROWARD 7
 #define START_MENU 8
+#define SPEED_UP_MOUSE 9
+#define SPEED_UP_SCROLL 10
 
 #endif
