@@ -318,6 +318,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			case IDM_APPLY_CONTROLS:
 			{
 				ctrlProf->mapControls();
+				::MessageBox(hWnd, L"Controls applied.", L"Success", MB_OK);
 			}
 				break;
 			case IDM_RESET_CONTROLS:
