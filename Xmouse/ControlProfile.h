@@ -17,11 +17,11 @@ public:
 	ControlProfile(HWND*);
 	
 	// save controls to ini file
-	void saveProfile(std::wstring, std::wstring, bool showMessage = TRUE);
+	bool saveProfile(std::wstring, std::wstring, bool showMessage = TRUE);
 	// load controls from ini file
-	void loadProfile(std::wstring, std::wstring, bool showMessage = TRUE);
+	bool loadProfile(std::wstring, std::wstring, bool showMessage = TRUE);
 	// map controls (populate controlMap)
-	void mapControls();
+	bool mapControls(bool showMessage = TRUE);
 };
 
 #endif

@@ -7,7 +7,6 @@
 #include <Xinput.h>
 #include <ShlObj.h>
 #include <Commdlg.h>
-#include <Shlwapi.h>
 
 #include "ControlCodes.h"
 #include "ControlProfile.h"
@@ -26,13 +25,18 @@ wchar_t szWindowClass[MAX_LOADSTRING];		// the main window class name
 HWND controlBoxes[CONTROL_COUNT];			// array holding the combo boxes for all the controls
 
 std::wstring roamingPath;					// path to Xmouse folder in AppData/Roaming
-ControlProfile *ctrlProf;
+ControlProfile *ctrlProf;					// object for performing ControlProfile functions
+
+int controllerId;							// id of the controller in use
 
 // Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
+
+void				addMenuItems(HWND, const wchar_t*[], int);
+int					getControllerId();
 
 // item
 
@@ -143,6 +147,28 @@ void addMenuItems(HWND cbox, const wchar_t *menuItems[], int itemCount)
 		SendMessage(cbox, CB_ADDSTRING, 0, (LPARAM)menuItems[i]);
 }
 
+/*
+function:	getControllerId()
+
+purpose:	retrieve the controller id of the first available controller
+
+return:		returns the id of the controller or -1 if none is found
+*/
+int getControllerId()
+{
+	int controllerId = -1;
+
+	for (DWORD i = 0; i < XUSER_MAX_COUNT && controllerId == -1; i++)
+	{
+		XINPUT_STATE state;
+		ZeroMemory(&state, sizeof(XINPUT_STATE));
+
+		if (XInputGetState(i, &state) == ERROR_SUCCESS)
+			controllerId = i;
+	}
+	return controllerId;
+}
+
 //
 //  FUNCTION: WndProc(HWND, UINT, WPARAM, LPARAM)
 //
@@ -225,20 +251,23 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			ctrlProf = new ControlProfile(controlBoxes);
 
 			// load last config, default config, or create default config, in order depending on existence
-			if (PathFileExists((roamingPath + L"LastConfig.ini").c_str()))
-				ctrlProf->loadProfile(roamingPath.c_str(), L"LastConfig", FALSE);
-			else if (PathFileExists((roamingPath + L"DefaultConfig.ini").c_str()))
-				ctrlProf->loadProfile(roamingPath.c_str(), L"DefaultConfig", FALSE);
-			else
+			
+			// bool for debugging the initial profile load (activates messages)
+			bool debugMode = TRUE;
+			
+			if (!ctrlProf->loadProfile(roamingPath.c_str(), L"LastConfig", debugMode))
 			{
-				// set defaults for each control box
-				int defaultControlValues[] = { 1,2,3,4,7,8,1,2,2,1,6,10,5,11,9,4 };
-				for (int i = 0; i < CONTROL_COUNT; ++i)
-					SendMessage(controlBoxes[i], CB_SETCURSEL, defaultControlValues[i], 0);
+				if (!ctrlProf->loadProfile(roamingPath.c_str(), L"DefaultConfig", debugMode))
+				{
+					// set defaults for each control box
+					int defaultControlValues[] = { 1,2,3,4,7,8,1,2,2,1,6,10,5,11,9,4 };
+					for (int i = 0; i < CONTROL_COUNT; ++i)
+						SendMessage(controlBoxes[i], CB_SETCURSEL, defaultControlValues[i], 0);
 
-				// save the current settings as the profile "Default", don't show message
-				ctrlProf->saveProfile(roamingPath.c_str(), L"DefaultConfig", FALSE);
-				ctrlProf->mapControls();
+					// save the current settings as the profile "Default", don't show message
+					ctrlProf->saveProfile(roamingPath.c_str(), L"DefaultConfig", debugMode);
+					ctrlProf->mapControls(debugMode);
+				}
 			}
 
 			// create apply button
@@ -251,6 +280,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				rect.bottom - rect.top - 40,
 				100, 30,
 				hWnd, (HMENU) IDM_APPLY_CONTROLS, hInst, NULL);
+
+			// get controller id, retry if none is found
+			/*while (!(controllerId = getControllerId()))
+			{
+				::MessageBox(hWnd, L"No Controller Found", L"Error", MB_OK);
+				wchar_t debugString[5];
+				_itow_s(controllerId, debugString, 5);
+				OutputDebugString(debugString);
+			}*/
+			/*wchar_t debugString[5];
+			_itow_s(controllerId, debugString, 5);
+			OutputDebugString(debugString);*/
 		}
 		break;
     case WM_COMMAND:
@@ -318,7 +359,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			case IDM_APPLY_CONTROLS:
 			{
 				ctrlProf->mapControls();
-				::MessageBox(hWnd, L"Controls applied.", L"Success", MB_OK);
 			}
 				break;
 			case IDM_RESET_CONTROLS:
