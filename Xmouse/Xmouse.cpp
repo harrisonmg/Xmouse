@@ -253,7 +253,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			// load last config, default config, or create default config, in order depending on existence
 			
 			// bool for debugging the initial profile load (activates messages)
-			bool debugMode = TRUE;
+			bool debugMode = FALSE;
 			
 			if (!ctrlProf->loadProfile(roamingPath.c_str(), L"LastConfig", debugMode))
 			{

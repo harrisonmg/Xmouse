@@ -32,19 +32,14 @@ bool ControlProfile::saveProfile(std::wstring roamingPath, std::wstring profileN
 	int selectionIndex;
 	for (int i = 0; i < CONTROL_COUNT; ++i)
 	{
-		wchar_t dstr[5];
-		_itow_s(i, dstr, 5);
-		OutputDebugString(dstr);
-		OutputDebugString(L"\n");
-
 		if ((selectionIndex = SendMessage(controlBoxes[i], CB_GETCURSEL, 0, 0)) == CB_ERR && showMessage)
 		{
 			::MessageBox(GetParent(controlBoxes[0]), _T("Invalid control selected. \"Nothing\" will be substituted."), _T("Error Saving Profile"), MB_OK);
 			selectionIndex = 0;
 		}
 		wchar_t keyName[5], value[5];
-		_itow_s(i, keyName, 5);
-		_itow_s(selectionIndex, value, 10);
+		_itow_s(i, keyName, 5, 10);
+		_itow_s(selectionIndex, value, 5, 10);
 
 		WritePrivateProfileString(L"Default", keyName, value, path.c_str());
 	}
@@ -83,7 +78,7 @@ bool ControlProfile::loadProfile(std::wstring roamingPath, std::wstring profileN
 	{
 		wchar_t keyName[5], value[5];
 
-		_itow_s(i, keyName, 5);
+		_itow_s(i, keyName, 5, 10);
 
 		GetPrivateProfileString(L"Default", keyName, LOAD_ERROR, value, 5, path.c_str());
 
