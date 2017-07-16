@@ -22,6 +22,8 @@ HINSTANCE hInst;							// current instance
 wchar_t szTitle[MAX_LOADSTRING];			// The title bar text
 wchar_t szWindowClass[MAX_LOADSTRING];		// the main window class name
 
+HWND mainWnd;								// main program window
+
 HWND controlBoxes[CONTROL_COUNT];			// array holding the combo boxes for all the controls
 
 std::wstring roamingPath;					// path to Xmouse folder in AppData/Roaming
@@ -31,7 +33,7 @@ int controllerId;							// id of the controller in use
 
 // Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
-BOOL                InitInstance(HINSTANCE, int);
+HWND                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
@@ -54,12 +56,60 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     MyRegisterClass(hInstance);
 
     // Perform application initialization:
-    if (!InitInstance (hInstance, nCmdShow))
+    if (InitInstance(hInstance, nCmdShow) == NULL)
     {
         return FALSE;
     }
 
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_XMOUSE));
+
+	// find path of AppData\Roaming and create the Xmouse folder in it
+	LPWSTR wszPath = NULL;
+	SHGetKnownFolderPath(FOLDERID_RoamingAppData, 0, NULL, &wszPath);
+	roamingPath = (std::wstring) wszPath + L"\\Xmouse\\";
+	CreateDirectory(roamingPath.c_str(), NULL);
+
+	// initialize control profile
+	ctrlProf = new ControlProfile(controlBoxes);
+
+	// load last config, default config, or create default config, in order depending on existence
+
+	// bool for debugging the initial profile load (activates messages)
+	bool debugMode = FALSE;
+
+	if (!ctrlProf->loadProfile(roamingPath.c_str(), L"LastConfig", debugMode))
+	{
+		if (!ctrlProf->loadProfile(roamingPath.c_str(), L"DefaultConfig", debugMode))
+		{
+			// set defaults for each control box
+			int defaultControlValues[] = { 1,2,3,4,7,8,1,2,2,1,6,10,5,11,9,4 };
+			for (int i = 0; i < CONTROL_COUNT; ++i)
+				SendMessage(controlBoxes[i], CB_SETCURSEL, defaultControlValues[i], 0);
+
+			// save the current settings as the profile "Default", don't show message
+			ctrlProf->saveProfile(roamingPath.c_str(), L"DefaultConfig", debugMode);
+			ctrlProf->mapControls(debugMode);
+		}
+	}
+
+	// get controller id, retry if none is found
+	while ((controllerId = getControllerId()) < 0)
+	{
+		switch (::MessageBox(mainWnd, L"No Controller Found", L"Error", MB_RETRYCANCEL))
+		{
+		case IDRETRY:
+			// loop around to try to find controller again
+			break;
+		case IDCANCEL:
+			// close if controller detection is cancelled
+			return FALSE;
+			break;
+		default:
+			break;
+		}
+	}
+
+
 
     MSG msg;
 
@@ -114,7 +164,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 //        In this function, we save the instance handle in a global variable and
 //        create and display the main program window.
 //
-BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
+HWND InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
    hInst = hInstance; // Store instance handle in our global variable
 
@@ -123,13 +173,80 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
    if (!hWnd)
    {
-      return FALSE;
+      return NULL;
    }
+
+   // create menu items to be added to each combo box
+   // ensure the index of each menu item is in accordance with the appropriate code in ControlCodes.h
+   const wchar_t *stickBoxItems[] = { L"Nothing", L"Mouse", L"Scroll", L"Inverted Scroll" };
+   int stickBoxItemCount = sizeof(stickBoxItems) / sizeof(const wchar_t *);
+
+   const wchar_t *buttonBoxItems[] = { L"Nothing", L"Left Click", L"Right Click", L"Show Keyboard", L"Show Desktop",
+	   L"Next Window", L"Previous Window",L"Browser Back", L"Browser Forward", L"Start Menu", L"Speed Up Mouse", L"Speed Up Scroll" };
+   int buttonBoxItemCount = sizeof(buttonBoxItems) / sizeof(const wchar_t *);
+
+   // store the (x,y) coordinates of each box in order *see ControlCodes.h
+   int controlBoxCoords[16][2] =
+   { { 136,274 },	// left stick
+   { 776,606 },	// right stick
+   { 88,403 },		// up
+   { 302,603 },	// down
+   { 81,463 },		// left
+   { 568,587 },	// right
+   { 990,401 },	// a
+   { 985,358 },	// b
+   { 971,315 },	// x
+   { 958,272 },	// y
+   { 166,150 },	// left bumper
+   { 203,44 },		// left trigger
+   { 916,158 },	// right bumper
+   { 894,44 },		// right trigger
+   { 624,148 },	// start
+   { 459,148 } };	// select
+
+					// create combo boxes for each control in controlBoxes
+
+   for (int i = 0; i < CONTROL_COUNT; ++i)
+   {
+	   controlBoxes[i] = CreateWindow(
+		   L"COMBOBOX",											// Predefined class; Unicode assumed
+		   NULL,													// Deafult box text (none)
+		   WS_VISIBLE | WS_CHILD | CBS_DROPDOWNLIST,  // Styles
+		   controlBoxCoords[i][0],									// x position
+		   controlBoxCoords[i][1],									// y position
+		   150,													// Box width
+		   500,													// Box height
+		   hWnd,													// Parent window
+		   NULL,													// No menu.
+		   hInst,													// Handle to instance
+		   NULL);													// Pointer not needed.
+   }
+
+   // add the correct menu options for each box
+
+   addMenuItems(controlBoxes[LEFT_STICK], stickBoxItems, stickBoxItemCount);
+   addMenuItems(controlBoxes[RIGHT_STICK], stickBoxItems, stickBoxItemCount);
+
+   for (int i = 2; i < CONTROL_COUNT; ++i)
+   {
+	   addMenuItems(controlBoxes[i], buttonBoxItems, buttonBoxItemCount);
+   }
+
+   // create apply button
+   RECT rect;
+   GetClientRect(hWnd, &rect);
+
+   CreateWindow(L"BUTTON", L"Apply",
+	   WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
+	   rect.right - rect.left - 110,
+	   rect.bottom - rect.top - 40,
+	   100, 30,
+	   hWnd, (HMENU)IDM_APPLY_CONTROLS, hInst, NULL);
 
    ShowWindow(hWnd, nCmdShow);
    UpdateWindow(hWnd);
 
-   return TRUE;
+   return hWnd;
 }
 
 /*
@@ -183,117 +300,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)
     {
-	case WM_CREATE:
-		{
-			// create menu items to be added to each combo box
-			// ensure the index of each menu item is in accordance with the appropriate code in ControlCodes.h
-			const wchar_t *stickBoxItems[] = { L"Nothing", L"Mouse", L"Scroll", L"Inverted Scroll" };
-			int stickBoxItemCount = sizeof(stickBoxItems) / sizeof(const wchar_t *);
-			
-			const wchar_t *buttonBoxItems[] = { L"Nothing", L"Left Click", L"Right Click", L"Show Keyboard", L"Show Desktop",
-				L"Next Window", L"Previous Window",L"Browser Back", L"Browser Forward", L"Start Menu", L"Speed Up Mouse", L"Speed Up Scroll" };
-			int buttonBoxItemCount = sizeof(buttonBoxItems) / sizeof(const wchar_t *);
-
-			// store the (x,y) coordinates of each box in order *see ControlCodes.h
-			int controlBoxCoords[16][2] =
-			{	{ 136,274 },	// left stick
-				{ 776,606 },	// right stick
-				{ 88,403 },		// up
-				{ 302,603 },	// down
-				{ 81,463 },		// left
-				{ 568,587 },	// right
-				{ 990,401 },	// a
-				{ 985,358 },	// b
-				{ 971,315 },	// x
-				{ 958,272 },	// y
-				{ 166,150 },	// left bumper
-				{ 203,44 },		// left trigger
-				{ 916,158 },	// right bumper
-				{ 894,44 },		// right trigger
-				{ 624,148 },	// start
-				{ 459,148 } };	// select
-			
-			// create combo boxes for each control in controlBoxes
-			
-			for (int i = 0; i < CONTROL_COUNT; ++i)
-			{
-				controlBoxes[i] = CreateWindow(
-					L"COMBOBOX",											// Predefined class; Unicode assumed
-					NULL,													// Deafult box text (none)
-					WS_VISIBLE | WS_CHILD | CBS_DROPDOWNLIST,  // Styles
-					controlBoxCoords[i][0],									// x position
-					controlBoxCoords[i][1],									// y position
-					150,													// Box width
-					500,													// Box height
-					hWnd,													// Parent window
-					NULL,													// No menu.
-					hInst,													// Handle to instance
-					NULL);													// Pointer not needed.
-			}
-
-			// add the correct menu options for each box
-			
-			addMenuItems(controlBoxes[LEFT_STICK], stickBoxItems, stickBoxItemCount);
-			addMenuItems(controlBoxes[RIGHT_STICK], stickBoxItems, stickBoxItemCount);
-
-			for (int i = 2; i < CONTROL_COUNT; ++i)
-			{
-				addMenuItems(controlBoxes[i], buttonBoxItems, buttonBoxItemCount);
-			}
-
-			// find path of AppData\Roaming and create the Xmouse folder in it
-			LPWSTR wszPath = NULL;
-			SHGetKnownFolderPath(FOLDERID_RoamingAppData, 0, NULL, &wszPath);
-			roamingPath = (std::wstring) wszPath + L"\\Xmouse\\";
-			CreateDirectory(roamingPath.c_str(), NULL);
-
-			// initialize control profile
-			ctrlProf = new ControlProfile(controlBoxes);
-
-			// load last config, default config, or create default config, in order depending on existence
-			
-			// bool for debugging the initial profile load (activates messages)
-			bool debugMode = FALSE;
-			
-			if (!ctrlProf->loadProfile(roamingPath.c_str(), L"LastConfig", debugMode))
-			{
-				if (!ctrlProf->loadProfile(roamingPath.c_str(), L"DefaultConfig", debugMode))
-				{
-					// set defaults for each control box
-					int defaultControlValues[] = { 1,2,3,4,7,8,1,2,2,1,6,10,5,11,9,4 };
-					for (int i = 0; i < CONTROL_COUNT; ++i)
-						SendMessage(controlBoxes[i], CB_SETCURSEL, defaultControlValues[i], 0);
-
-					// save the current settings as the profile "Default", don't show message
-					ctrlProf->saveProfile(roamingPath.c_str(), L"DefaultConfig", debugMode);
-					ctrlProf->mapControls(debugMode);
-				}
-			}
-
-			// create apply button
-			RECT rect;
-			GetClientRect(hWnd, &rect);
-
-			CreateWindow(L"BUTTON", L"Apply",
-				WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
-				rect.right - rect.left - 110,
-				rect.bottom - rect.top - 40,
-				100, 30,
-				hWnd, (HMENU) IDM_APPLY_CONTROLS, hInst, NULL);
-
-			// get controller id, retry if none is found
-			/*while (!(controllerId = getControllerId()))
-			{
-				::MessageBox(hWnd, L"No Controller Found", L"Error", MB_OK);
-				wchar_t debugString[5];
-				_itow_s(controllerId, debugString, 5);
-				OutputDebugString(debugString);
-			}*/
-			/*wchar_t debugString[5];
-			_itow_s(controllerId, debugString, 5);
-			OutputDebugString(debugString);*/
-		}
-		break;
     case WM_COMMAND:
         {
             int wmId = LOWORD(wParam);
