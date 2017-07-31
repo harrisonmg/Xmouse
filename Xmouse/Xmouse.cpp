@@ -4,12 +4,12 @@
 #include "stdafx.h"
 #include "Xmouse.h"
 
-#include <Xinput.h>
 #include <ShlObj.h>
 #include <Commdlg.h>
 
 #include "ControlCodes.h"
 #include "ControlProfile.h"
+#include "ControlListener.h"
 
 #define MAX_LOADSTRING 100
 
@@ -28,8 +28,7 @@ HWND controlBoxes[CONTROL_COUNT];			// array holding the combo boxes for all the
 
 std::wstring roamingPath;					// path to Xmouse folder in AppData/Roaming
 ControlProfile *ctrlProf;					// object for performing ControlProfile functions
-
-int controllerId;							// id of the controller in use
+ControlListener *ctrlLsnr;					// object that listens for controls
 
 // Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -38,7 +37,6 @@ LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
 void				addMenuItems(HWND, const wchar_t*[], int);
-int					getControllerId();
 
 // item
 
@@ -56,7 +54,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     MyRegisterClass(hInstance);
 
     // Perform application initialization:
-    if (InitInstance(hInstance, nCmdShow) == NULL)
+    if ((mainWnd = InitInstance(hInstance, nCmdShow)) == NULL)
     {
         return FALSE;
     }
@@ -92,24 +90,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		}
 	}
 
-	// get controller id, retry if none is found
-	while ((controllerId = getControllerId()) < 0)
-	{
-		switch (::MessageBox(mainWnd, L"No Controller Found", L"Error", MB_RETRYCANCEL))
-		{
-		case IDRETRY:
-			// loop around to try to find controller again
-			break;
-		case IDCANCEL:
-			// close if controller detection is cancelled
-			return FALSE;
-			break;
-		default:
-			break;
-		}
-	}
-
-
+	// initialize control listener
+	ctrlLsnr = new ControlListener(mainWnd, ctrlProf);
 
     MSG msg;
 
@@ -262,28 +244,6 @@ void addMenuItems(HWND cbox, const wchar_t *menuItems[], int itemCount)
 {
 	for (int i = 0; i < itemCount; ++i)
 		SendMessage(cbox, CB_ADDSTRING, 0, (LPARAM)menuItems[i]);
-}
-
-/*
-function:	getControllerId()
-
-purpose:	retrieve the controller id of the first available controller
-
-return:		returns the id of the controller or -1 if none is found
-*/
-int getControllerId()
-{
-	int controllerId = -1;
-
-	for (DWORD i = 0; i < XUSER_MAX_COUNT && controllerId == -1; i++)
-	{
-		XINPUT_STATE state;
-		ZeroMemory(&state, sizeof(XINPUT_STATE));
-
-		if (XInputGetState(i, &state) == ERROR_SUCCESS)
-			controllerId = i;
-	}
-	return controllerId;
 }
 
 //

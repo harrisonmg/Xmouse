@@ -141,6 +141,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ControlCodes.h" />
+    <ClInclude Include="ControlListener.h" />
     <ClInclude Include="ControlProfile.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
@@ -148,6 +149,7 @@
     <ClInclude Include="Xmouse.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ControlListener.cpp" />
     <ClCompile Include="ControlProfile.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
