@@ -17,6 +17,8 @@
 #define IDM_APPLY_CONTROLS		112
 #define IDM_RESET_CONTROLS		113
 
+#define IDM_SET_DEADZONES		114
+
 #define IDI_XMOUSE			107
 #define IDI_SMALL				108
 #define IDC_XMOUSE			109

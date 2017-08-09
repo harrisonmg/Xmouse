@@ -6,7 +6,7 @@
 #include "ControlProfile.h"
 #include "ControlCodes.h"
 
-#define LOAD_ERROR L"load error"
+#define LOAD_ERROR L"lder"
 
 ControlProfile::ControlProfile(HWND *controlBoxes)
 {

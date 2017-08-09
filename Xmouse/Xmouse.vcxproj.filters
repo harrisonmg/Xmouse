@@ -36,7 +36,7 @@
     <ClInclude Include="ControlProfile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ControlListener.h">
+    <ClInclude Include="Gamepad.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -50,7 +50,7 @@
     <ClCompile Include="ControlProfile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ControlListener.cpp">
+    <ClCompile Include="Gamepad.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

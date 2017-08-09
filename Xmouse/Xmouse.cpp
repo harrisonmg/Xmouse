@@ -9,7 +9,7 @@
 
 #include "ControlCodes.h"
 #include "ControlProfile.h"
-#include "ControlListener.h"
+#include "Gamepad.h"
 
 #define MAX_LOADSTRING 100
 
@@ -28,7 +28,10 @@ HWND controlBoxes[CONTROL_COUNT];			// array holding the combo boxes for all the
 
 std::wstring roamingPath;					// path to Xmouse folder in AppData/Roaming
 ControlProfile *ctrlProf;					// object for performing ControlProfile functions
-ControlListener *ctrlLsnr;					// object that listens for controls
+Gamepad *gpad;								// gamepad object
+
+DWORD listenerThreadId;						// gamepad listener thread ID
+HANDLE listenerHandle;						// gamepad listener thread handle
 
 // Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -91,7 +94,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	}
 
 	// initialize control listener
-	ctrlLsnr = new ControlListener(mainWnd, ctrlProf);
+	gpad = new Gamepad(mainWnd, ctrlProf, roamingPath);
+
+	// create and start gamepad listener thread
+	listenerHandle = CreateThread(0, 0, (LPTHREAD_START_ROUTINE) Gamepad::listen, gpad, 0, &listenerThreadId);
 
     MSG msg;
 
@@ -334,6 +340,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				ctrlProf->mapControls();
 			}
 			break;
+			case IDM_SET_DEADZONES:
+			{
+				gpad->setDeadzones();
+			}
+			break;
             default:
                 return DefWindowProc(hWnd, message, wParam, lParam);
             }
@@ -365,6 +376,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     case WM_DESTROY:
 		ctrlProf->saveProfile(roamingPath.c_str(), L"LastConfig", FALSE);
+		CloseHandle(listenerHandle);
         PostQuitMessage(0);
         break;
     default:
