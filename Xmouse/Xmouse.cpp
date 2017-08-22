@@ -30,8 +30,11 @@ std::wstring roamingPath;					// path to Xmouse folder in AppData/Roaming
 ControlProfile *ctrlProf;					// object for performing ControlProfile functions
 Gamepad *gpad;								// gamepad object
 
-DWORD listenerThreadId;						// gamepad listener thread ID
-HANDLE listenerHandle;						// gamepad listener thread handle
+DWORD stickListenerThreadId;				// analog stick listener thread ID
+HANDLE stickListenerHandle;					// analog stick listener thread handle
+
+DWORD buttonListenerThreadId;				// button listener thread ID
+HANDLE buttonListenerHandle;				// button listener thread handle
 
 // Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -96,8 +99,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	// initialize control listener
 	gpad = new Gamepad(mainWnd, ctrlProf, roamingPath);
 
-	// create and start gamepad listener thread
-	listenerHandle = CreateThread(0, 0, (LPTHREAD_START_ROUTINE) Gamepad::listen, gpad, 0, &listenerThreadId);
+	// create and start gamepad listener threads
+	stickListenerHandle = CreateThread(0, 0, (LPTHREAD_START_ROUTINE) Gamepad::stickListen, gpad, 0, &stickListenerThreadId);
+	buttonListenerHandle = CreateThread(0, 0, (LPTHREAD_START_ROUTINE) Gamepad::buttonListen, gpad, 0, &buttonListenerThreadId);
 
     MSG msg;
 
@@ -376,8 +380,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     case WM_DESTROY:
 		ctrlProf->saveProfile(roamingPath.c_str(), L"LastConfig", FALSE);
-		CloseHandle(listenerHandle);
-        PostQuitMessage(0);
+		CloseHandle(stickListenerHandle);
+		CloseHandle(buttonListenerHandle);
+		PostQuitMessage(0);
         break;
     default:
         return DefWindowProc(hWnd, message, wParam, lParam);

@@ -2,6 +2,7 @@
 #include <string>
 #include <ShlObj.h>
 #include <Shlwapi.h>
+#include <sstream>
 
 #include "ControlProfile.h"
 #include "ControlCodes.h"
@@ -11,6 +12,12 @@
 ControlProfile::ControlProfile(HWND *controlBoxes)
 {
 	this->controlBoxes = controlBoxes;
+
+	currentMouseMultiplier = 1;
+	currentScrollMultiplier = 1;
+
+	mouseSensitivity = 10;
+	mouseSpeedMultiplier = 3;
 }
 
 /*
@@ -125,6 +132,7 @@ bool ControlProfile::mapControls(bool showMessage)
 		}
 		else
 		{
+			if (i <= 1) selectionIndex *= -1;
 			controlMap[i] = selectionIndex;
 		}
 	}
@@ -132,4 +140,47 @@ bool ControlProfile::mapControls(bool showMessage)
 		::MessageBox(GetParent(controlBoxes[0]), L"Controls applied.", L"Success", MB_OK);
 
 	return TRUE;
+}
+
+/*
+function:	controlInput()
+
+purpose:	translate the input and execute the appropriate command
+
+params:		int controlCode - the code for what control was 
+
+returns:	TRUE if successful, FALSE if not
+*/
+void ControlProfile::controlInput(int controlCode, float paramA, float paramB)
+{
+	std::wstringstream wss(L"");
+
+	// translate
+	controlCode = controlMap[controlCode];
+
+	switch (controlCode)
+	{
+	case SPEED_UP_MOUSE:
+		currentMouseMultiplier = 1 + paramA * (mouseSpeedMultiplier - 1);
+		break;
+	case MOUSE:
+		mouse_event(MOUSEEVENTF_MOVE, paramA * mouseSensitivity * currentMouseMultiplier, -paramB * mouseSensitivity * currentMouseMultiplier, 0, 0);
+		break;
+	case LEFT_CLICK:
+		wss << paramA << "\n";
+		//OutputDebugString(wss.str().c_str());
+		if (paramA)
+		{
+			OutputDebugString(L"mouse down\n");
+			mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
+		}
+		else
+		{
+			OutputDebugString(L"mouse up\n");
+			mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
+		}
+		break;
+	default:
+		break;
+	}
 }

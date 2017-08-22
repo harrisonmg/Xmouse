@@ -10,7 +10,13 @@ class ControlProfile
 private:
 
 	HWND *controlBoxes;
+	
+	// <
 	std::map<int, int> controlMap;
+	
+	float leftTrigger, rightTrigger;
+	float mouseSensitivity, mouseSpeedMultiplier, currentMouseMultiplier;
+	float scrollSensitivity, scrollSpeedMultiplier, currentScrollMultiplier;
 
 public:
 
@@ -22,6 +28,8 @@ public:
 	bool loadProfile(std::wstring, std::wstring, bool showMessage = TRUE);
 	// map controls (populate controlMap)
 	bool mapControls(bool showMessage = TRUE);
+	// translate control and execute command
+	void controlInput(int, float paramA = 0, float paramB = 0);
 };
 
 #endif
