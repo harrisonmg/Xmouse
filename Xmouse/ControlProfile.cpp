@@ -133,6 +133,7 @@ bool ControlProfile::mapControls(bool showMessage)
 		else
 		{
 			if (i <= 1) selectionIndex *= -1;
+			else if (i <= 3) selectionIndex *= -4;
 			controlMap[i] = selectionIndex;
 		}
 	}
@@ -147,38 +148,37 @@ function:	controlInput()
 
 purpose:	translate the input and execute the appropriate command
 
-params:		int controlCode - the code for what control was 
+params:		int controlCode - the code for what control was
+			float paramA, paramB - generic parameters used for sending data,
+									default to 0
 
 returns:	TRUE if successful, FALSE if not
 */
 void ControlProfile::controlInput(int controlCode, float paramA, float paramB)
 {
-	std::wstringstream wss(L"");
-
 	// translate
 	controlCode = controlMap[controlCode];
 
+	std::wstringstream wss(L"");
+	
 	switch (controlCode)
 	{
+	case NO_CONTROL:
+		break;
 	case SPEED_UP_MOUSE:
 		currentMouseMultiplier = 1 + paramA * (mouseSpeedMultiplier - 1);
+		break;
+	case SPEED_UP_SCROLL:
+		currentScrollMultiplier = 1 + paramA * (scrollSpeedMultiplier - 1);
 		break;
 	case MOUSE:
 		mouse_event(MOUSEEVENTF_MOVE, paramA * mouseSensitivity * currentMouseMultiplier, -paramB * mouseSensitivity * currentMouseMultiplier, 0, 0);
 		break;
 	case LEFT_CLICK:
-		wss << paramA << "\n";
-		//OutputDebugString(wss.str().c_str());
-		if (paramA)
-		{
-			OutputDebugString(L"mouse down\n");
+		if (paramA > 0)
 			mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
-		}
 		else
-		{
-			OutputDebugString(L"mouse up\n");
 			mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
-		}
 		break;
 	default:
 		break;

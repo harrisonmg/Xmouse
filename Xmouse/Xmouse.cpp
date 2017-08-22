@@ -174,40 +174,43 @@ HWND InitInstance(HINSTANCE hInstance, int nCmdShow)
    int stickBoxItemCount = sizeof(stickBoxItems) / sizeof(const wchar_t *);
 
    const wchar_t *buttonBoxItems[] = { L"Nothing", L"Left Click", L"Right Click", L"Show Keyboard", L"Show Desktop",
-	   L"Next Window", L"Previous Window",L"Browser Back", L"Browser Forward", L"Start Menu", L"Speed Up Mouse", L"Speed Up Scroll" };
+	   L"Next Window", L"Previous Window",L"Browser Back", L"Browser Forward", L"Start Menu" };
    int buttonBoxItemCount = sizeof(buttonBoxItems) / sizeof(const wchar_t *);
+
+   const wchar_t *triggerBoxItems[] = { L"Nothing", L"Speed Up Mouse", L"Speed Up Scroll" };
+   int triggerBoxItemCount = sizeof(triggerBoxItems) / sizeof(const wchar_t *);
+   
 
    // store the (x,y) coordinates of each box in order *see ControlCodes.h
    int controlBoxCoords[16][2] =
    { { 136,274 },	// left stick
-   { 776,606 },	// right stick
-   { 88,403 },		// up
-   { 302,603 },	// down
-   { 81,463 },		// left
-   { 568,587 },	// right
-   { 990,401 },	// a
-   { 985,358 },	// b
-   { 971,315 },	// x
-   { 958,272 },	// y
-   { 166,150 },	// left bumper
+   { 776,606 },		// right stick
    { 203,44 },		// left trigger
-   { 916,158 },	// right bumper
    { 894,44 },		// right trigger
-   { 624,148 },	// start
+   { 88,403 },		// up
+   { 302,603 },		// down
+   { 81,463 },		// left
+   { 568,587 },		// right
+   { 990,401 },		// a
+   { 985,358 },		// b
+   { 971,315 },		// x
+   { 958,272 },		// y
+   { 166,150 },		// left bumper
+   { 916,158 },		// right bumper
+   { 624,148 },		// start
    { 459,148 } };	// select
 
-					// create combo boxes for each control in controlBoxes
-
+	// create combo boxes for each control in controlBoxes
    for (int i = 0; i < CONTROL_COUNT; ++i)
    {
 	   controlBoxes[i] = CreateWindow(
-		   L"COMBOBOX",											// Predefined class; Unicode assumed
+		   L"COMBOBOX",												// Predefined class; Unicode assumed
 		   NULL,													// Deafult box text (none)
-		   WS_VISIBLE | WS_CHILD | CBS_DROPDOWNLIST,  // Styles
+		   WS_VISIBLE | WS_CHILD | CBS_DROPDOWNLIST,				// Styles
 		   controlBoxCoords[i][0],									// x position
 		   controlBoxCoords[i][1],									// y position
-		   150,													// Box width
-		   500,													// Box height
+		   150,														// Box width
+		   500,														// Box height
 		   hWnd,													// Parent window
 		   NULL,													// No menu.
 		   hInst,													// Handle to instance
@@ -219,7 +222,10 @@ HWND InitInstance(HINSTANCE hInstance, int nCmdShow)
    addMenuItems(controlBoxes[LEFT_STICK], stickBoxItems, stickBoxItemCount);
    addMenuItems(controlBoxes[RIGHT_STICK], stickBoxItems, stickBoxItemCount);
 
-   for (int i = 2; i < CONTROL_COUNT; ++i)
+   addMenuItems(controlBoxes[LEFT_TRIGGER], triggerBoxItems, triggerBoxItemCount);
+   addMenuItems(controlBoxes[RIGHT_TRIGGER], triggerBoxItems, triggerBoxItemCount);
+
+   for (int i = 4; i < CONTROL_COUNT; ++i)
    {
 	   addMenuItems(controlBoxes[i], buttonBoxItems, buttonBoxItemCount);
    }
