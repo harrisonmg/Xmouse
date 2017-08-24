@@ -156,11 +156,19 @@ returns:	TRUE if successful, FALSE if not
 */
 void ControlProfile::controlInput(int controlCode, float paramA, float paramB)
 {
+	std::wstringstream wss(L"");
+
+	wss << controlCode;
+
 	// translate
 	controlCode = controlMap[controlCode];
 
-	std::wstringstream wss(L"");
-	
+	if (controlCode != MOUSE)
+	{
+		wss << " " << controlCode << "\n";
+		OutputDebugString(wss.str().c_str());
+	}
+
 	switch (controlCode)
 	{
 	case NO_CONTROL:
@@ -179,6 +187,12 @@ void ControlProfile::controlInput(int controlCode, float paramA, float paramB)
 			mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
 		else
 			mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
+		break;
+	case RIGHT_CLICK:
+		if (paramA > 0)
+			mouse_event(MOUSEEVENTF_RIGHTDOWN, 0, 0, 0, 0);
+		else
+			mouse_event(MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0);
 		break;
 	default:
 		break;
