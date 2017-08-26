@@ -18,6 +18,9 @@ ControlProfile::ControlProfile(HWND *controlBoxes)
 
 	mouseSensitivity = 10;
 	mouseSpeedMultiplier = 3;
+
+	scrollSensitivity = 40;
+	scrollSpeedMultiplier = 2;
 }
 
 /*
@@ -163,7 +166,7 @@ void ControlProfile::controlInput(int controlCode, float paramA, float paramB)
 	// translate
 	controlCode = controlMap[controlCode];
 
-	if (controlCode != MOUSE)
+	if (controlCode > 0)
 	{
 		wss << " " << controlCode << "\n";
 		OutputDebugString(wss.str().c_str());
@@ -173,15 +176,25 @@ void ControlProfile::controlInput(int controlCode, float paramA, float paramB)
 	{
 	case NO_CONTROL:
 		break;
+
+	// stick controls
+	case MOUSE:
+		mouse_event(MOUSEEVENTF_MOVE, paramA * mouseSensitivity * currentMouseMultiplier, -paramB * mouseSensitivity * currentMouseMultiplier, 0, 0);
+		break;
+	case SCROLL:
+		mouse_event(MOUSEEVENTF_HWHEEL, 0, 0, paramA * scrollSensitivity * currentScrollMultiplier, 0);
+		mouse_event(MOUSEEVENTF_WHEEL, 0, 0, paramB * scrollSensitivity * currentScrollMultiplier, 0);
+		break;
+	
+	// trigger controls
 	case SPEED_UP_MOUSE:
 		currentMouseMultiplier = 1 + paramA * (mouseSpeedMultiplier - 1);
 		break;
 	case SPEED_UP_SCROLL:
 		currentScrollMultiplier = 1 + paramA * (scrollSpeedMultiplier - 1);
 		break;
-	case MOUSE:
-		mouse_event(MOUSEEVENTF_MOVE, paramA * mouseSensitivity * currentMouseMultiplier, -paramB * mouseSensitivity * currentMouseMultiplier, 0, 0);
-		break;
+
+	// button controls
 	case LEFT_CLICK:
 		if (paramA > 0)
 			mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
@@ -194,6 +207,7 @@ void ControlProfile::controlInput(int controlCode, float paramA, float paramB)
 		else
 			mouse_event(MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0);
 		break;
+
 	default:
 		break;
 	}
