@@ -86,7 +86,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		if (!ctrlProf->loadProfile(roamingPath.c_str(), L"DefaultConfig", debugMode))
 		{
 			// set defaults for each control box
-			int defaultControlValues[] = { 1,2,3,4,7,8,1,2,2,1,6,10,5,11,9,4 };
+			int defaultControlValues[] = { 1,2,1,2,7,5,8,4,1,2,2,3,9,10,11,6 };
 			for (int i = 0; i < CONTROL_COUNT; ++i)
 				SendMessage(controlBoxes[i], CB_SETCURSEL, defaultControlValues[i], 0);
 
@@ -170,11 +170,11 @@ HWND InitInstance(HINSTANCE hInstance, int nCmdShow)
 
    // create menu items to be added to each combo box
    // ensure the index of each menu item is in accordance with the appropriate code in ControlCodes.h
-   const wchar_t *stickBoxItems[] = { L"Nothing", L"Mouse", L"Scroll", L"Inverted Scroll" };
+   const wchar_t *stickBoxItems[] = { L"Nothing", L"Mouse", L"Scroll" };
    int stickBoxItemCount = sizeof(stickBoxItems) / sizeof(const wchar_t *);
 
-   const wchar_t *buttonBoxItems[] = { L"Nothing", L"Left Click", L"Right Click", L"Show Keyboard", L"Show Desktop",
-	   L"Next Window", L"Previous Window",L"Browser Back", L"Browser Forward", L"Start Menu" };
+   const wchar_t *buttonBoxItems[] = { L"Nothing", L"Left Click", L"Right Click", L"Middle Click", L"Copy", L"Paste", L"Show Desktop",
+	   L"View Windows", L"Previous Window",L"Browser Back", L"Browser Forward", L"Start Menu" };
    int buttonBoxItemCount = sizeof(buttonBoxItems) / sizeof(const wchar_t *);
 
    const wchar_t *triggerBoxItems[] = { L"Nothing", L"Speed Up Mouse", L"Speed Up Scroll" };
@@ -193,8 +193,8 @@ HWND InitInstance(HINSTANCE hInstance, int nCmdShow)
    { 568,587 },		// right
    { 990,401 },		// a
    { 985,358 },		// b
-   { 971,315 },		// x
-   { 958,272 },		// y
+   { 958,272 },		// x
+   { 971,315 },		// y
    { 166,150 },		// left bumper
    { 916,158 },		// right bumper
    { 624,148 },		// start

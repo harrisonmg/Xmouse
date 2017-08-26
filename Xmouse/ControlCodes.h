@@ -28,19 +28,20 @@
 
 #define MOUSE				-1
 #define SCROLL				-2
-#define INVERTED_SCROLL		-3
 
 #define SPEED_UP_MOUSE		-4
 #define SPEED_UP_SCROLL		-8
 
 #define LEFT_CLICK			1
 #define RIGHT_CLICK			2
-#define SHOW_KEYBOARD		3
-#define SHOW_DESKTOP		4
-#define NEXT_WINDOW			5
-#define PREVIOUS_WINDOW		6
-#define BROWSER_BACK		7
-#define BROWSER_FROWARD		8
-#define START_MENU			9
+#define MIDDLE_CLICK		3
+#define COPY				4
+#define PASTE				5
+#define SHOW_DESKTOP		6
+#define VIEW_WINDOWS		7
+#define PREVIOUS_WINDOW		8
+#define BROWSER_BACK		9
+#define BROWSER_FORWARD		10
+#define START_MENU			11
 
 #endif

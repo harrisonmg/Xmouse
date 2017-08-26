@@ -17,7 +17,7 @@ ControlProfile::ControlProfile(HWND *controlBoxes)
 	currentScrollMultiplier = 1;
 
 	mouseSensitivity = 10;
-	mouseSpeedMultiplier = 3;
+	mouseSpeedMultiplier = 2;
 
 	scrollSensitivity = 40;
 	scrollSpeedMultiplier = 2;
@@ -159,6 +159,7 @@ returns:	TRUE if successful, FALSE if not
 */
 void ControlProfile::controlInput(int controlCode, float paramA, float paramB)
 {
+	// stream for debugging
 	std::wstringstream wss(L"");
 
 	wss << controlCode;
@@ -171,6 +172,9 @@ void ControlProfile::controlInput(int controlCode, float paramA, float paramB)
 		wss << " " << controlCode << "\n";
 		OutputDebugString(wss.str().c_str());
 	}
+
+	// array of INPUT structures for keystrokes
+	INPUT ips[3];
 
 	switch (controlCode)
 	{
@@ -206,6 +210,236 @@ void ControlProfile::controlInput(int controlCode, float paramA, float paramB)
 			mouse_event(MOUSEEVENTF_RIGHTDOWN, 0, 0, 0, 0);
 		else
 			mouse_event(MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0);
+		break;
+	case MIDDLE_CLICK:
+		if (paramA > 0)
+			mouse_event(MOUSEEVENTF_MIDDLEDOWN, 0, 0, 0, 0);
+		else
+			mouse_event(MOUSEEVENTF_MIDDLEUP, 0, 0, 0, 0);
+		break;
+	case COPY:
+		ips[0].type = INPUT_KEYBOARD;
+		ips[0].ki.wScan = 0;
+		ips[0].ki.time = 0;
+		ips[0].ki.dwExtraInfo = 0;
+
+		ips[0].ki.wVk = VK_CONTROL; // control key
+
+		ips[1].type = INPUT_KEYBOARD;
+		ips[1].ki.wScan = 0;
+		ips[1].ki.time = 0;
+		ips[1].ki.dwExtraInfo = 0;
+
+		ips[1].ki.wVk = 0x43; // C key
+
+		if (paramA > 0)
+		{
+			ips[0].ki.dwFlags = 0;
+			ips[1].ki.dwFlags = 0;
+			SendInput(2, ips, sizeof(INPUT));
+		}
+		else
+		{
+			ips[0].ki.dwFlags = KEYEVENTF_KEYUP;
+			ips[1].ki.dwFlags = KEYEVENTF_KEYUP;
+			SendInput(2, ips, sizeof(INPUT));
+		}
+		break;
+	case PASTE:
+		ips[0].type = INPUT_KEYBOARD;
+		ips[0].ki.wScan = 0;
+		ips[0].ki.time = 0;
+		ips[0].ki.dwExtraInfo = 0;
+
+		ips[0].ki.wVk = VK_CONTROL; // control key
+
+		ips[1].type = INPUT_KEYBOARD;
+		ips[1].ki.wScan = 0;
+		ips[1].ki.time = 0;
+		ips[1].ki.dwExtraInfo = 0;
+
+		ips[1].ki.wVk = 0x56; // V key
+
+		if (paramA > 0)
+		{
+			ips[0].ki.dwFlags = 0;
+			ips[1].ki.dwFlags = 0;
+			SendInput(2, ips, sizeof(INPUT));
+		}
+		else
+		{
+			ips[0].ki.dwFlags = KEYEVENTF_KEYUP;
+			ips[1].ki.dwFlags = KEYEVENTF_KEYUP;
+			SendInput(2, ips, sizeof(INPUT));
+		}
+		break;
+	case SHOW_DESKTOP:
+		ips[0].type = INPUT_KEYBOARD;
+		ips[0].ki.wScan = 0;
+		ips[0].ki.time = 0;
+		ips[0].ki.dwExtraInfo = 0;
+
+		ips[0].ki.wVk = VK_LWIN; // left windows key
+
+		ips[1].type = INPUT_KEYBOARD;
+		ips[1].ki.wScan = 0;
+		ips[1].ki.time = 0;
+		ips[1].ki.dwExtraInfo = 0;
+
+		ips[1].ki.wVk = 0x44; // D key
+
+		if (paramA > 0)
+		{
+			ips[0].ki.dwFlags = 0;
+			ips[1].ki.dwFlags = 0;
+			SendInput(2, ips, sizeof(INPUT));
+		}
+		else
+		{
+			ips[0].ki.dwFlags = KEYEVENTF_KEYUP;
+			ips[1].ki.dwFlags = KEYEVENTF_KEYUP;
+			SendInput(2, ips, sizeof(INPUT));
+		}
+		break;
+	case VIEW_WINDOWS:
+		ips[0].type = INPUT_KEYBOARD;
+		ips[0].ki.wScan = 0;
+		ips[0].ki.time = 0;
+		ips[0].ki.dwExtraInfo = 0;
+
+		ips[0].ki.wVk = VK_CONTROL; // control key
+
+		ips[1].type = INPUT_KEYBOARD;
+		ips[1].ki.wScan = 0;
+		ips[1].ki.time = 0;
+		ips[1].ki.dwExtraInfo = 0;
+
+		ips[1].ki.wVk = VK_MENU; // alt key
+
+		ips[2].type = INPUT_KEYBOARD;
+		ips[2].ki.wScan = 0;
+		ips[2].ki.time = 0;
+		ips[2].ki.dwExtraInfo = 0;
+
+		ips[2].ki.wVk = VK_TAB; // tab key
+
+		if (paramA > 0)
+		{
+			ips[0].ki.dwFlags = 0;
+			ips[1].ki.dwFlags = 0;
+			ips[2].ki.dwFlags = 0;
+			SendInput(3, ips, sizeof(INPUT));
+		}
+		else
+		{
+			ips[0].ki.dwFlags = KEYEVENTF_KEYUP;
+			ips[1].ki.dwFlags = KEYEVENTF_KEYUP;
+			ips[2].ki.dwFlags = KEYEVENTF_KEYUP;
+			SendInput(3, ips, sizeof(INPUT));
+		}
+		break;
+	case PREVIOUS_WINDOW:
+		ips[0].type = INPUT_KEYBOARD;
+		ips[0].ki.wScan = 0;
+		ips[0].ki.time = 0;
+		ips[0].ki.dwExtraInfo = 0;
+
+		ips[0].ki.wVk = VK_MENU; // alt key
+
+		ips[1].type = INPUT_KEYBOARD;
+		ips[1].ki.wScan = 0;
+		ips[1].ki.time = 0;
+		ips[1].ki.dwExtraInfo = 0;
+
+		ips[1].ki.wVk = VK_TAB; // tab key
+
+		if (paramA > 0)
+		{
+			ips[0].ki.dwFlags = 0;
+			ips[1].ki.dwFlags = 0;
+			SendInput(2, ips, sizeof(INPUT));
+		}
+		else
+		{
+			ips[0].ki.dwFlags = KEYEVENTF_KEYUP;
+			ips[1].ki.dwFlags = KEYEVENTF_KEYUP;
+			SendInput(2, ips, sizeof(INPUT));
+		}
+		break;
+	case BROWSER_BACK:
+		ips[0].type = INPUT_KEYBOARD;
+		ips[0].ki.wScan = 0;
+		ips[0].ki.time = 0;
+		ips[0].ki.dwExtraInfo = 0;
+
+		ips[0].ki.wVk = VK_MENU; // alt key
+
+		ips[1].type = INPUT_KEYBOARD;
+		ips[1].ki.wScan = 0;
+		ips[1].ki.time = 0;
+		ips[1].ki.dwExtraInfo = 0;
+
+		ips[1].ki.wVk = VK_LEFT; // left arrow key
+
+		if (paramA > 0)
+		{
+			ips[0].ki.dwFlags = 0;
+			ips[1].ki.dwFlags = 0;
+			SendInput(2, ips, sizeof(INPUT));
+		}
+		else
+		{
+			ips[0].ki.dwFlags = KEYEVENTF_KEYUP;
+			ips[1].ki.dwFlags = KEYEVENTF_KEYUP;
+			SendInput(2, ips, sizeof(INPUT));
+		}
+		break;
+	case BROWSER_FORWARD:
+		ips[0].type = INPUT_KEYBOARD;
+		ips[0].ki.wScan = 0;
+		ips[0].ki.time = 0;
+		ips[0].ki.dwExtraInfo = 0;
+
+		ips[0].ki.wVk = VK_MENU; // alt key
+
+		ips[1].type = INPUT_KEYBOARD;
+		ips[1].ki.wScan = 0;
+		ips[1].ki.time = 0;
+		ips[1].ki.dwExtraInfo = 0;
+
+		ips[1].ki.wVk = VK_RIGHT; // right arrow key
+
+		if (paramA > 0)
+		{
+			ips[0].ki.dwFlags = 0;
+			ips[1].ki.dwFlags = 0;
+			SendInput(2, ips, sizeof(INPUT));
+		}
+		else
+		{
+			ips[0].ki.dwFlags = KEYEVENTF_KEYUP;
+			ips[1].ki.dwFlags = KEYEVENTF_KEYUP;
+			SendInput(2, ips, sizeof(INPUT));
+		}
+		break;
+	case START_MENU:
+		ips[0].type = INPUT_KEYBOARD;
+		ips[0].ki.wScan = 0;
+		ips[0].ki.time = 0;
+		ips[0].ki.dwExtraInfo = 0;
+
+		ips[0].ki.wVk = VK_LWIN; // left windows key
+
+		if (paramA > 0)
+		{
+			ips[0].ki.dwFlags = 0;
+			SendInput(1, ips, sizeof(INPUT));
+		}
+		else
+		{
+			ips[0].ki.dwFlags = KEYEVENTF_KEYUP;
+			SendInput(1, ips, sizeof(INPUT));
+		}
 		break;
 
 	default:
