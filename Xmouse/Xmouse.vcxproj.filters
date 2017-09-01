@@ -60,10 +60,10 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="small.ico">
+    <Image Include="Xmouse.ico">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="Xmouse.ico">
+    <Image Include="controller.bmp">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

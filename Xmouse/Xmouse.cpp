@@ -141,7 +141,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
     wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW+1);
     wcex.lpszMenuName   = MAKEINTRESOURCEW(IDC_XMOUSE);
     wcex.lpszClassName  = szWindowClass;
-    wcex.hIconSm        = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
+    wcex.hIconSm        = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_XMOUSE));
 
     return RegisterClassExW(&wcex);
 }
@@ -370,7 +370,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             hdc = BeginPaint(hWnd, &ps);
 			
-			HBITMAP hBitmap = (HBITMAP)LoadImage(hInst, L"controller.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+			HBITMAP hBitmap = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_CONTROLLER));
 
 			hdcMem = CreateCompatibleDC(hdc);
 			oldBitmap = SelectObject(hdcMem, hBitmap);

@@ -163,7 +163,7 @@
     <ResourceCompile Include="Xmouse.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="small.ico" />
+    <Image Include="controller.bmp" />
     <Image Include="Xmouse.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
