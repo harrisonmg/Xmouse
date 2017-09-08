@@ -1,4 +1,6 @@
 # Xmouse
+![alt text](https://github.com/harrisonmg/Xmouse/blob/master/Xmouse_Screencap.png)
+
 ## What Is It
 Xmouse is a Windows program that allows a user to map functions of the mouse and keyboard to a gamepad.
 
