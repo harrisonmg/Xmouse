@@ -12,15 +12,6 @@
 ControlProfile::ControlProfile(HWND *controlBoxes)
 {
 	this->controlBoxes = controlBoxes;
-
-	currentMouseMultiplier = 1;
-	currentScrollMultiplier = 1;
-
-	mouseSensitivity = 10;
-	mouseSpeedMultiplier = 2;
-
-	scrollSensitivity = 40;
-	scrollSpeedMultiplier = 2;
 }
 
 /*

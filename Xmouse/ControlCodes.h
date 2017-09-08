@@ -2,7 +2,7 @@
 #define CONTROL_CODES
 
 // number of controls
-#define CONTROL_COUNT		16
+#define CONTROL_COUNT		20
 
 #define LEFT_STICK			0
 #define RIGHT_STICK			1
@@ -22,6 +22,11 @@
 #define RIGHT_BUMPER		13
 #define START				14
 #define SELECT				15
+
+#define MOUSE_SENSITIVITY	16
+#define MOUSE_MULTIPLIER	17
+#define SCROLL_SENSITIVITY	18
+#define SCROLL_MULTIPLIER	19
 
 // index codes for computer controls
 #define NO_CONTROL			0

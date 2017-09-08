@@ -201,9 +201,9 @@ HWND InitInstance(HINSTANCE hInstance, int nCmdShow)
    { 459,148 } };	// select
 
 	// create combo boxes for each control in controlBoxes
-   for (int i = 0; i < CONTROL_COUNT; ++i)
+   for (int i = 0; i < MOUSE_SENSITIVITY; ++i)
    {
-	   controlBoxes[i] = CreateWindow(
+		controlBoxes[i] = CreateWindow(
 		   L"COMBOBOX",												// Predefined class; Unicode assumed
 		   NULL,													// Deafult box text (none)
 		   WS_VISIBLE | WS_CHILD | CBS_DROPDOWNLIST,				// Styles
@@ -217,6 +217,9 @@ HWND InitInstance(HINSTANCE hInstance, int nCmdShow)
 		   NULL);													// Pointer not needed.
    }
 
+   // create sliders
+
+
    // add the correct menu options for each box
 
    addMenuItems(controlBoxes[LEFT_STICK], stickBoxItems, stickBoxItemCount);
@@ -225,7 +228,7 @@ HWND InitInstance(HINSTANCE hInstance, int nCmdShow)
    addMenuItems(controlBoxes[LEFT_TRIGGER], triggerBoxItems, triggerBoxItemCount);
    addMenuItems(controlBoxes[RIGHT_TRIGGER], triggerBoxItems, triggerBoxItemCount);
 
-   for (int i = 4; i < CONTROL_COUNT; ++i)
+   for (int i = 4; i < MOUSE_SENSITIVITY; ++i)
    {
 	   addMenuItems(controlBoxes[i], buttonBoxItems, buttonBoxItemCount);
    }

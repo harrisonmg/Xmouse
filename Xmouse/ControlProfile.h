@@ -11,7 +11,6 @@ private:
 
 	HWND *controlBoxes;
 	
-	// <
 	std::map<int, int> controlMap;
 	
 	float leftTrigger, rightTrigger;
