@@ -25,9 +25,9 @@
 #define SELECT				15
 
 #define MOUSE_SENSITIVITY	16
-#define MOUSE_MULTIPLIER	17
+#define MOUSE_MODIFIER		17
 #define SCROLL_SENSITIVITY	18
-#define SCROLL_MULTIPLIER	19
+#define SCROLL_MODIFIER		19
 
 // index codes for computer controls
 #define NO_CONTROL			0

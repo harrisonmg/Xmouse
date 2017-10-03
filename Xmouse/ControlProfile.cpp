@@ -12,6 +12,9 @@
 ControlProfile::ControlProfile(HWND *controlBoxes)
 {
 	this->controlBoxes = controlBoxes;
+
+	currentMouseModifier = 1;
+	currentScrollModifier= 1;
 }
 
 /*
@@ -174,19 +177,19 @@ void ControlProfile::controlInput(int controlCode, float paramA, float paramB)
 
 		// stick controls
 	case MOUSE:
-		mouse_event(MOUSEEVENTF_MOVE, paramA * mouseSensitivity * currentMouseMultiplier, -paramB * mouseSensitivity * currentMouseMultiplier, 0, 0);
+		mouse_event(MOUSEEVENTF_MOVE, paramA * mouseSensitivity * currentMouseModifier, -paramB * mouseSensitivity * currentMouseModifier, 0, 0);
 		break;
 	case SCROLL:
-		mouse_event(MOUSEEVENTF_HWHEEL, 0, 0, paramA * scrollSensitivity * currentScrollMultiplier, 0);
-		mouse_event(MOUSEEVENTF_WHEEL, 0, 0, paramB * scrollSensitivity * currentScrollMultiplier, 0);
+		mouse_event(MOUSEEVENTF_HWHEEL, 0, 0, paramA * scrollSensitivity * currentScrollModifier, 0);
+		mouse_event(MOUSEEVENTF_WHEEL, 0, 0, paramB * scrollSensitivity * currentScrollModifier, 0);
 		break;
 
 		// trigger controls
 	case SPEED_UP_MOUSE:
-		currentMouseMultiplier = 1 + paramA * (mouseSpeedMultiplier - 1);
+		currentMouseModifier = 1 + paramA * (mouseSpeedModifier - 1);
 		break;
 	case SPEED_UP_SCROLL:
-		currentScrollMultiplier = 1 + paramA * (scrollSpeedMultiplier - 1);
+		currentScrollModifier = 1 + paramA * (scrollSpeedModifier - 1);
 		break;
 
 		// button controls

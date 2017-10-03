@@ -208,10 +208,10 @@ HWND InitInstance(HINSTANCE hInstance, int nCmdShow)
 	{ 916,158 },	// right bumper
 	{ 624,148 },	// start
 	{ 459,148 },	// select
-	{ 10,660 },		// mouse sensitivity
-	{ 10,700 },		// mouse multiplier
-	{ 220,660 },	// scroll sensivity
-	{ 220,700 } };	// scroll multiplier
+	{ 10,700 },		// mouse sensitivity
+	{ 270,700 },		// mouse modifier
+	{ 530,700 },	// scroll sensivity
+	{ 790,700 } };	// scroll modifier
 
 	 // create combo boxes for each control in controlBoxes
 	 // SELECT is the last control code before the sensitivity sliders
@@ -232,21 +232,33 @@ HWND InitInstance(HINSTANCE hInstance, int nCmdShow)
 	};
 
 	// create sliders
-	const wchar_t * sliderTitles[] = { L"Mouse Sensitivity", L"Mouse Speed Multiplier",
-		L"Scroll Sensitivity", L"Scroll Speed Multiplier" };
+	// decide min and max values for slider
+	int sliderRanges[4][2] =
+	{ { 1,100 },	// mouse sens
+	{ 1,10 },		// mouse mod
+	{ 1,100 },		// scroll sens
+	{ 1,10 } };		// scroll mod
 
-	for (int i = MOUSE_SENSITIVITY; i <= SCROLL_MULTIPLIER; ++i)
+	for (int i = MOUSE_SENSITIVITY; i <= SCROLL_MODIFIER; ++i)
 	{
 		controlBoxes[i] = CreateWindow(
 			TRACKBAR_CLASS,												// class name
-			sliderTitles[i-MOUSE_SENSITIVITY],							// title (caption)
-			WS_CHILD | WS_VISIBLE | TBS_AUTOTICKS,						// styles
+			NULL,														// title (caption, doesn't matter)
+			WS_CHILD | WS_VISIBLE,						// styles
 			controlBoxCoords[i][0], controlBoxCoords[i][1],				// position
 			200, 30,													// size
 			hWnd,														// parent window
 			NULL,														// no menu
 			hInst,														// instance
 			NULL);														// no WM_CREATE param
+
+		SendMessage(controlBoxes[i], TBM_SETRANGE,
+			(WPARAM) TRUE,																						// redraw flag 
+			(LPARAM) MAKELONG(sliderRanges[i - MOUSE_SENSITIVITY][0], sliderRanges[i - MOUSE_SENSITIVITY][1]));  // min. & max. positions
+
+		SendMessage(controlBoxes[i], TBM_SETTICFREQ,
+			(WPARAM) TRUE,	// redraw flag
+			(LPARAM) sliderRanges[i - MOUSE_SENSITIVITY][1] / 10);	// tick frequency
 	};
 
 	// add the correct menu options for each box
@@ -307,16 +319,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message)
 	{
-/*	case WM_LBUTTONDOWN:
-	{
-		// useful for placing features in window
-		int x = LOWORD(lParam);
-		int y = HIWORD(lParam);
-		wchar_t waCoord[20];
-		wsprintf(waCoord, _T("(%i, %i)"), x, y);
-		::MessageBox(hWnd, waCoord, _T("LMB Click"), MB_OK);
-	}
-	break;	*/
+		/*	case WM_LBUTTONDOWN:
+			{
+				// useful for placing features in window
+				int x = LOWORD(lParam);
+				int y = HIWORD(lParam);
+				wchar_t waCoord[20];
+				wsprintf(waCoord, _T("(%i, %i)"), x, y);
+				::MessageBox(hWnd, waCoord, _T("LMB Click"), MB_OK);
+			}
+			break;	*/
 	case WM_COMMAND:
 	{
 		int wmId = LOWORD(wParam);
@@ -435,7 +447,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 		CloseHandle(stickListenerHandle);
 		CloseHandle(buttonListenerHandle);
-		
+
 		PostQuitMessage(0);
 		break;
 	default:
