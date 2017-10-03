@@ -234,6 +234,7 @@ HWND InitInstance(HINSTANCE hInstance, int nCmdShow)
 	// create sliders
 	const wchar_t * sliderTitles[] = { L"Mouse Sensitivity", L"Mouse Speed Multiplier",
 		L"Scroll Sensitivity", L"Scroll Speed Multiplier" };
+
 	for (int i = MOUSE_SENSITIVITY; i <= SCROLL_MULTIPLIER; ++i)
 	{
 		controlBoxes[i] = CreateWindow(
@@ -249,7 +250,6 @@ HWND InitInstance(HINSTANCE hInstance, int nCmdShow)
 	};
 
 	// add the correct menu options for each box
-
 	addMenuItems(controlBoxes[LEFT_STICK], stickBoxItems, stickBoxItemCount);
 	addMenuItems(controlBoxes[RIGHT_STICK], stickBoxItems, stickBoxItemCount);
 
