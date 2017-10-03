@@ -4,6 +4,7 @@
 // number of controls
 #define CONTROL_COUNT		20
 
+// index codes for gamepad controls
 #define LEFT_STICK			0
 #define RIGHT_STICK			1
 

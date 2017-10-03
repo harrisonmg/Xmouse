@@ -23,7 +23,7 @@ params:		wstring roamingPath - path to the ~\appdata\roaming\ folder
 			wstring profileName - the name (and filename) of the control profile
 			bool showMessage - default set to TRUE, can otherwise set to show or not show messages
 
-returns:	TRUE if successful, FALSE if not	
+returns:	TRUE if successful, FALSE if not
 */
 bool ControlProfile::saveProfile(std::wstring roamingPath, std::wstring profileName, bool showMessage)
 {
@@ -172,7 +172,7 @@ void ControlProfile::controlInput(int controlCode, float paramA, float paramB)
 	case NO_CONTROL:
 		break;
 
-	// stick controls
+		// stick controls
 	case MOUSE:
 		mouse_event(MOUSEEVENTF_MOVE, paramA * mouseSensitivity * currentMouseMultiplier, -paramB * mouseSensitivity * currentMouseMultiplier, 0, 0);
 		break;
@@ -180,8 +180,8 @@ void ControlProfile::controlInput(int controlCode, float paramA, float paramB)
 		mouse_event(MOUSEEVENTF_HWHEEL, 0, 0, paramA * scrollSensitivity * currentScrollMultiplier, 0);
 		mouse_event(MOUSEEVENTF_WHEEL, 0, 0, paramB * scrollSensitivity * currentScrollMultiplier, 0);
 		break;
-	
-	// trigger controls
+
+		// trigger controls
 	case SPEED_UP_MOUSE:
 		currentMouseMultiplier = 1 + paramA * (mouseSpeedMultiplier - 1);
 		break;
@@ -189,7 +189,7 @@ void ControlProfile::controlInput(int controlCode, float paramA, float paramB)
 		currentScrollMultiplier = 1 + paramA * (scrollSpeedMultiplier - 1);
 		break;
 
-	// button controls
+		// button controls
 	case LEFT_CLICK:
 		if (paramA > 0)
 			mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);

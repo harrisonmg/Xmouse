@@ -10,9 +10,9 @@ class ControlProfile
 private:
 
 	HWND *controlBoxes;
-	
+
 	std::map<int, int> controlMap;
-	
+
 	float leftTrigger, rightTrigger;
 	float mouseSensitivity, mouseSpeedMultiplier, currentMouseMultiplier;
 	float scrollSensitivity, scrollSpeedMultiplier, currentScrollMultiplier;
@@ -20,7 +20,7 @@ private:
 public:
 
 	ControlProfile(HWND*);
-	
+
 	// save controls to ini file
 	bool saveProfile(std::wstring, std::wstring, bool showMessage = TRUE);
 	// load controls from ini file
