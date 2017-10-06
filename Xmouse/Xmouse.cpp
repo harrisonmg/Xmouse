@@ -25,6 +25,7 @@ wchar_t szWindowClass[MAX_LOADSTRING];		// the main window class name
 HWND mainWnd;								// main program window
 
 HWND controlBoxes[CONTROL_COUNT];			// array holding the combo boxes for all the controls
+HWND sliderStatics[SCROLL_MODIFIER - SELECT]; // array holding the static value labels for each slider
 
 std::wstring roamingPath;					// path to Xmouse folder in AppData/Roaming
 ControlProfile *ctrlProf;					// object for performing ControlProfile functions
@@ -209,7 +210,7 @@ HWND InitInstance(HINSTANCE hInstance, int nCmdShow)
 	{ 624,148 },	// start
 	{ 459,148 },	// select
 	{ 10,700 },		// mouse sensitivity
-	{ 270,700 },		// mouse modifier
+	{ 270,700 },	// mouse modifier
 	{ 530,700 },	// scroll sensivity
 	{ 790,700 } };	// scroll modifier
 
@@ -239,12 +240,15 @@ HWND InitInstance(HINSTANCE hInstance, int nCmdShow)
 	{ 1,100 },		// scroll sens
 	{ 1,10 } };		// scroll mod
 
+	wchar_t *sliderLabels[] = { L"Mouse Sensitivity", L"Mouse Modifier",
+		L"Scroll Speed", L"Scroll Modifier" };
+
 	for (int i = MOUSE_SENSITIVITY; i <= SCROLL_MODIFIER; ++i)
 	{
 		controlBoxes[i] = CreateWindow(
 			TRACKBAR_CLASS,												// class name
 			NULL,														// title (caption, doesn't matter)
-			WS_CHILD | WS_VISIBLE,						// styles
+			WS_CHILD | WS_VISIBLE,							// styles
 			controlBoxCoords[i][0], controlBoxCoords[i][1],				// position
 			200, 30,													// size
 			hWnd,														// parent window
@@ -256,9 +260,21 @@ HWND InitInstance(HINSTANCE hInstance, int nCmdShow)
 			(WPARAM) TRUE,																						// redraw flag 
 			(LPARAM) MAKELONG(sliderRanges[i - MOUSE_SENSITIVITY][0], sliderRanges[i - MOUSE_SENSITIVITY][1]));  // min. & max. positions
 
-		SendMessage(controlBoxes[i], TBM_SETTICFREQ,
-			(WPARAM) TRUE,	// redraw flag
-			(LPARAM) sliderRanges[i - MOUSE_SENSITIVITY][1] / 10);	// tick frequency
+		sliderStatics[i - MOUSE_SENSITIVITY] = CreateWindow(
+			L"STATIC",												        /*The name of the static control's class*/
+			L"init",														/*Label's Text*/
+			WS_CHILD | WS_VISIBLE | SS_CENTER | SS_CENTERIMAGE | SS_SUNKEN,	/*Styles (continued)*/
+			controlBoxCoords[i][0] + 210, controlBoxCoords[i][1],			// position
+			40, 30,															// size
+			hWnd, NULL, hInst, NULL);
+
+		CreateWindow(
+			L"STATIC",												        /*The name of the static control's class*/
+			sliderLabels[i - MOUSE_SENSITIVITY],							/*Label's Text*/
+			WS_CHILD | WS_VISIBLE | SS_CENTER | SS_CENTERIMAGE,				/*Styles (continued)*/
+			controlBoxCoords[i][0], controlBoxCoords[i][1] - 20,			// position
+			200, 30,														// size
+			hWnd, NULL, hInst, NULL);
 	};
 
 	// add the correct menu options for each box
@@ -329,6 +345,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				::MessageBox(hWnd, waCoord, _T("LMB Click"), MB_OK);
 			}
 			break;	*/
+	case WM_CTLCOLORSTATIC:
+	{
+		return (LRESULT)GetStockObject(WHITE_BRUSH);
+	}
+	break;
 	case WM_COMMAND:
 	{
 		int wmId = LOWORD(wParam);
