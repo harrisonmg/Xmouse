@@ -14,8 +14,8 @@ private:
 	std::map<int, int> controlMap;
 
 	float leftTrigger, rightTrigger;
-	float mouseSensitivity, mouseSpeedModifier, currentMouseModifier;
-	float scrollSensitivity, scrollSpeedModifier, currentScrollModifier;
+	float mouseSpeed, mouseMod, currentMouseMod;
+	float scrollSpeed, scrollMod, currentScrollMod;
 
 public:
 

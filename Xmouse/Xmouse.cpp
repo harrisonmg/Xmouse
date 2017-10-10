@@ -46,6 +46,7 @@ LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
 void				addMenuItems(HWND, const wchar_t*[], int);
+void				updateSliderStatics();
 
 // item
 
@@ -90,8 +91,15 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		{
 			// set defaults for each control box
 			int defaultControlValues[] = { 1,2,1,2,7,5,8,4,1,2,2,3,9,10,11,6 };
-			for (int i = 0; i < CONTROL_COUNT; ++i)
+			for (int i = 0; i < MOUSE_SPEED; ++i)
 				SendMessage(controlBoxes[i], CB_SETCURSEL, defaultControlValues[i], 0);
+			
+			// set default for trackbars
+			int defaultTrackbarValues[] = { 10,2,40,2 };
+			for (int i = MOUSE_SPEED; i <= SCROLL_MODIFIER; ++i)
+				SendMessage(controlBoxes[i], TBM_SETPOS, TRUE, (LPARAM)defaultTrackbarValues[i - MOUSE_SPEED]);
+
+			updateSliderStatics();
 
 			// save the current settings as the profile "Default", don't show message
 			ctrlProf->saveProfile(roamingPath.c_str(), L"DefaultConfig", debugMode);
@@ -209,13 +217,13 @@ HWND InitInstance(HINSTANCE hInstance, int nCmdShow)
 	{ 916,158 },	// right bumper
 	{ 624,148 },	// start
 	{ 459,148 },	// select
-	{ 10,700 },		// mouse sensitivity
+	{ 10,700 },		// mouse speed
 	{ 270,700 },	// mouse modifier
 	{ 530,700 },	// scroll sensivity
 	{ 790,700 } };	// scroll modifier
 
 	 // create combo boxes for each control in controlBoxes
-	 // SELECT is the last control code before the sensitivity sliders
+	 // SELECT is the last control code before the speed sliders
 	for (int i = 0; i <= SELECT; ++i)
 	{
 		controlBoxes[i] = CreateWindow(
@@ -240,15 +248,15 @@ HWND InitInstance(HINSTANCE hInstance, int nCmdShow)
 	{ 1,100 },		// scroll sens
 	{ 1,10 } };		// scroll mod
 
-	wchar_t *sliderLabels[] = { L"Mouse Sensitivity", L"Mouse Modifier",
+	wchar_t *sliderLabels[] = { L"Mouse Speed", L"Mouse Modifier",
 		L"Scroll Speed", L"Scroll Modifier" };
 
-	for (int i = MOUSE_SENSITIVITY; i <= SCROLL_MODIFIER; ++i)
+	for (int i = MOUSE_SPEED; i <= SCROLL_MODIFIER; ++i)
 	{
 		controlBoxes[i] = CreateWindow(
 			TRACKBAR_CLASS,												// class name
 			NULL,														// title (caption, doesn't matter)
-			WS_CHILD | WS_VISIBLE,							// styles
+			WS_CHILD | WS_VISIBLE,										// styles
 			controlBoxCoords[i][0], controlBoxCoords[i][1],				// position
 			200, 30,													// size
 			hWnd,														// parent window
@@ -257,10 +265,11 @@ HWND InitInstance(HINSTANCE hInstance, int nCmdShow)
 			NULL);														// no WM_CREATE param
 
 		SendMessage(controlBoxes[i], TBM_SETRANGE,
-			(WPARAM) TRUE,																						// redraw flag 
-			(LPARAM) MAKELONG(sliderRanges[i - MOUSE_SENSITIVITY][0], sliderRanges[i - MOUSE_SENSITIVITY][1]));  // min. & max. positions
+			(WPARAM) TRUE,																							// redraw flag 
+			(LPARAM) MAKELONG(sliderRanges[i - MOUSE_SPEED][0], sliderRanges[i - MOUSE_SPEED][1]));		// min. & max. positions
 
-		sliderStatics[i - MOUSE_SENSITIVITY] = CreateWindow(
+		// display value of the trackbars
+		sliderStatics[i - MOUSE_SPEED] = CreateWindow(
 			L"STATIC",												        /*The name of the static control's class*/
 			L"init",														/*Label's Text*/
 			WS_CHILD | WS_VISIBLE | SS_CENTER | SS_CENTERIMAGE | SS_SUNKEN,	/*Styles (continued)*/
@@ -268,14 +277,18 @@ HWND InitInstance(HINSTANCE hInstance, int nCmdShow)
 			40, 30,															// size
 			hWnd, NULL, hInst, NULL);
 
+		// create name labels for the trackbars
 		CreateWindow(
 			L"STATIC",												        /*The name of the static control's class*/
-			sliderLabels[i - MOUSE_SENSITIVITY],							/*Label's Text*/
+			sliderLabels[i - MOUSE_SPEED],							/*Label's Text*/
 			WS_CHILD | WS_VISIBLE | SS_CENTER | SS_CENTERIMAGE,				/*Styles (continued)*/
 			controlBoxCoords[i][0], controlBoxCoords[i][1] - 20,			// position
 			200, 30,														// size
 			hWnd, NULL, hInst, NULL);
 	};
+
+	// initial update of slider value labels
+	updateSliderStatics();
 
 	// add the correct menu options for each box
 	addMenuItems(controlBoxes[LEFT_STICK], stickBoxItems, stickBoxItemCount);
@@ -321,6 +334,23 @@ void addMenuItems(HWND cbox, const wchar_t *menuItems[], int itemCount)
 		SendMessage(cbox, CB_ADDSTRING, 0, (LPARAM)menuItems[i]);
 }
 
+/*
+function:	updateSliderStatics()
+
+purpose:	update the labels to display each slider's value
+*/
+void updateSliderStatics()
+{
+	for (int i = MOUSE_SPEED; i <= SCROLL_MODIFIER; ++i)
+	{
+		LRESULT pos = SendMessage(controlBoxes[i], TBM_GETPOS, 0, 0);
+		wchar_t buf[4];
+		wsprintfW(buf, L"%d", pos);
+
+		SendMessage(sliderStatics[i - MOUSE_SPEED], WM_SETTEXT, NULL, (LPARAM)buf);
+	}
+}
+
 //
 //  FUNCTION: WndProc(HWND, UINT, WPARAM, LPARAM)
 //
@@ -345,6 +375,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				::MessageBox(hWnd, waCoord, _T("LMB Click"), MB_OK);
 			}
 			break;	*/
+	case WM_HSCROLL:
+	{
+		updateSliderStatics();
+	}
+	break;
 	case WM_CTLCOLORSTATIC:
 	{
 		return (LRESULT)GetStockObject(WHITE_BRUSH);
