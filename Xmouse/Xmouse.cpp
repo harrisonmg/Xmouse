@@ -85,9 +85,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	// bool for debugging the initial profile load (activates messages)
 	bool debugMode = FALSE;
 
-	if (!ctrlProf->loadProfile(roamingPath.c_str(), L"LastConfig", debugMode))
+	if (!ctrlProf->loadProfile(roamingPath.c_str(), L"LastConfig", updateSliderStatics, debugMode))
 	{
-		if (!ctrlProf->loadProfile(roamingPath.c_str(), L"DefaultConfig", debugMode))
+		if (!ctrlProf->loadProfile(roamingPath.c_str(), L"DefaultConfig", updateSliderStatics, debugMode))
 		{
 			// set defaults for each control box
 			int defaultControlValues[] = { 1,2,1,2,7,5,8,4,1,2,2,3,9,10,11,6 };
@@ -99,6 +99,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			for (int i = MOUSE_SPEED; i <= SCROLL_MODIFIER; ++i)
 				SendMessage(controlBoxes[i], TBM_SETPOS, TRUE, (LPARAM)defaultTrackbarValues[i - MOUSE_SPEED]);
 
+			// update slider value labels
 			updateSliderStatics();
 
 			// save the current settings as the profile "Default", don't show message
@@ -287,9 +288,6 @@ HWND InitInstance(HINSTANCE hInstance, int nCmdShow)
 			hWnd, NULL, hInst, NULL);
 	};
 
-	// initial update of slider value labels
-	updateSliderStatics();
-
 	// add the correct menu options for each box
 	addMenuItems(controlBoxes[LEFT_STICK], stickBoxItems, stickBoxItemCount);
 	addMenuItems(controlBoxes[RIGHT_STICK], stickBoxItems, stickBoxItemCount);
@@ -344,7 +342,7 @@ void updateSliderStatics()
 	for (int i = MOUSE_SPEED; i <= SCROLL_MODIFIER; ++i)
 	{
 		LRESULT pos = SendMessage(controlBoxes[i], TBM_GETPOS, 0, 0);
-		wchar_t buf[4];
+		wchar_t buf[5];
 		wsprintfW(buf, L"%d", pos);
 
 		SendMessage(sliderStatics[i - MOUSE_SPEED], WM_SETTEXT, NULL, (LPARAM)buf);
@@ -443,7 +441,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			{
 				wchar_t profileName[MAX_PATH];
 				_wsplitpath_s(szFilePath, NULL, NULL, NULL, NULL, profileName, MAX_PATH, NULL, NULL);
-				ctrlProf->loadProfile(roamingPath, profileName);
+				ctrlProf->loadProfile(roamingPath, profileName, updateSliderStatics);
 			}
 		}
 		break;

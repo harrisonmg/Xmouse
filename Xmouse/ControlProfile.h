@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include <string>
 #include <map>
+#include <functional>
 
 class ControlProfile
 {
@@ -24,7 +25,7 @@ public:
 	// save controls to ini file
 	bool saveProfile(std::wstring, std::wstring, bool showMessage = TRUE);
 	// load controls from ini file
-	bool loadProfile(std::wstring, std::wstring, bool showMessage = TRUE);
+	bool loadProfile(std::wstring, std::wstring, std::function<void()>, bool showMessage = TRUE);
 	// map controls (populate controlMap)
 	bool mapControls(bool showMessage = TRUE);
 	// translate control and execute command
