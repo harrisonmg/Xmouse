@@ -24,10 +24,16 @@ private:
 public:
 
 	Gamepad(HWND, ControlProfile*, std::wstring);
+
+	struct listenerArgs
+	{
+		bool* threadEnd;
+		Gamepad* gpad;
+	};
 	
 	void checkConnection();
-	static void stickListen(Gamepad*);
-	static void buttonListen(Gamepad*);
+	static void stickListen(listenerArgs*);
+	static void buttonListen(listenerArgs*);
 	void setDeadzones();
 	int getControllerId();
 	bool refresh();

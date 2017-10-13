@@ -3,24 +3,19 @@
 #include <ShlObj.h>
 #include <Shlwapi.h>
 #include <sstream>
+#include <functional>
 
 #include "ControlProfile.h"
 #include "ControlCodes.h"
 
-#define LOAD_ERROR L"lder"
+#define LOAD_ERROR L"LDER"
 
 ControlProfile::ControlProfile(HWND *controlBoxes)
 {
 	this->controlBoxes = controlBoxes;
 
-	currentMouseMultiplier = 1;
-	currentScrollMultiplier = 1;
-
-	mouseSensitivity = 10;
-	mouseSpeedMultiplier = 2;
-
-	scrollSensitivity = 40;
-	scrollSpeedMultiplier = 2;
+	currentMouseMod = 1;
+	currentScrollMod = 1;
 }
 
 /*
@@ -32,7 +27,7 @@ params:		wstring roamingPath - path to the ~\appdata\roaming\ folder
 			wstring profileName - the name (and filename) of the control profile
 			bool showMessage - default set to TRUE, can otherwise set to show or not show messages
 
-returns:	TRUE if successful, FALSE if not	
+returns:	TRUE if successful, FALSE if not
 */
 bool ControlProfile::saveProfile(std::wstring roamingPath, std::wstring profileName, bool showMessage)
 {
@@ -40,7 +35,7 @@ bool ControlProfile::saveProfile(std::wstring roamingPath, std::wstring profileN
 
 
 	int selectionIndex;
-	for (int i = 0; i < CONTROL_COUNT; ++i)
+	for (int i = 0; i < MOUSE_SPEED; ++i)
 	{
 		if ((selectionIndex = SendMessage(controlBoxes[i], CB_GETCURSEL, 0, 0)) == CB_ERR && showMessage)
 		{
@@ -53,6 +48,17 @@ bool ControlProfile::saveProfile(std::wstring roamingPath, std::wstring profileN
 
 		WritePrivateProfileString(L"Default", keyName, value, path.c_str());
 	}
+
+	for (int i = MOUSE_SPEED; i <= SCROLL_MODIFIER; ++i)
+	{
+		LRESULT pos = SendMessage(controlBoxes[i], TBM_GETPOS, 0, 0);
+		wchar_t keyName[5], value[5];
+		wsprintfW(value, L"%d", pos);
+		_itow_s(i, keyName, 5, 10);
+
+		WritePrivateProfileString(L"Default", keyName, value, path.c_str());
+	}
+
 	if (showMessage)
 	{
 		std::wstring successMessage = L"The profile " + profileName + L" has been saved.";
@@ -72,7 +78,7 @@ params:		wstring roamingPath - path to the ~\appdata\roaming\ folder
 
 returns:	TRUE if successful, FALSE if not
 */
-bool ControlProfile::loadProfile(std::wstring roamingPath, std::wstring profileName, bool showMessage)
+bool ControlProfile::loadProfile(std::wstring roamingPath, std::wstring profileName, std::function<void()> updateLabels, bool showMessage)
 {
 	std::wstring path = roamingPath + profileName + L".ini";
 
@@ -84,7 +90,7 @@ bool ControlProfile::loadProfile(std::wstring roamingPath, std::wstring profileN
 		return FALSE;
 	}
 
-	for (int i = 0; i < CONTROL_COUNT; ++i)
+	for (int i = 0; i < MOUSE_SPEED; ++i)
 	{
 		wchar_t keyName[5], value[5];
 
@@ -105,6 +111,31 @@ bool ControlProfile::loadProfile(std::wstring roamingPath, std::wstring profileN
 				::MessageBox(GetParent(controlBoxes[0]), _T("Profile contains and invalid value. \"Nothing\" will be substituted."), _T("Load Profile Warning"), MB_OK);
 		}
 	}
+
+	for (int i = MOUSE_SPEED; i <= SCROLL_MODIFIER; ++i)
+	{
+		wchar_t keyName[5], value[5];
+
+		_itow_s(i, keyName, 5, 10);
+
+		GetPrivateProfileString(L"Default", keyName, LOAD_ERROR, value, 5, path.c_str());
+
+		if (wcscmp(value, LOAD_ERROR) == 0)
+		{
+			if (showMessage)
+				::MessageBox(GetParent(controlBoxes[0]), _T("Profile is incomplete."), _T("Load Profile Error"), MB_OK);
+			return FALSE;
+		}
+		else
+		{
+			if (SendMessage(controlBoxes[i], TBM_SETPOS, TRUE, (LPARAM)_wtoi(value)) == CB_ERR && showMessage)
+				::MessageBox(GetParent(controlBoxes[0]), _T("Profile contains and invalid value. \"Nothing\" will be substituted."), _T("Load Profile Warning"), MB_OK);
+		}
+	}
+
+	// update value lables
+	updateLabels();
+
 	if (showMessage)
 	{
 		std::wstring successMessage = L"The profile " + profileName + L" has been loaded.";
@@ -126,7 +157,7 @@ returns:	TRUE if successful, FALSE if not
 bool ControlProfile::mapControls(bool showMessage)
 {
 	int selectionIndex;
-	for (int i = 0; i < CONTROL_COUNT; ++i)
+	for (int i = 0; i < MOUSE_SPEED; ++i)
 	{
 		if ((selectionIndex = SendMessage(controlBoxes[i], CB_GETCURSEL, 0, 0)) == CB_ERR && showMessage)
 		{
@@ -140,6 +171,21 @@ bool ControlProfile::mapControls(bool showMessage)
 			controlMap[i] = selectionIndex;
 		}
 	}
+
+	float* trackbarValues[] = { &mouseSpeed, &mouseMod, &scrollSpeed, &scrollMod };
+	for (int i = MOUSE_SPEED; i <= SCROLL_MODIFIER; ++i)
+	{
+		if ((selectionIndex = SendMessage(controlBoxes[i], TBM_GETPOS, 0, 0)) == CB_ERR && showMessage)
+		{
+			::MessageBox(GetParent(controlBoxes[0]), _T("Invalid control selected. Controls must be remapped."), _T("Error Applying Controls"), MB_OK);
+			return FALSE;
+		}
+		else
+		{
+			*trackbarValues[i - MOUSE_SPEED] = selectionIndex;
+		}
+	}
+
 	if (showMessage)
 		::MessageBox(GetParent(controlBoxes[0]), L"Controls applied.", L"Success", MB_OK);
 
@@ -181,24 +227,24 @@ void ControlProfile::controlInput(int controlCode, float paramA, float paramB)
 	case NO_CONTROL:
 		break;
 
-	// stick controls
+		// stick controls
 	case MOUSE:
-		mouse_event(MOUSEEVENTF_MOVE, paramA * mouseSensitivity * currentMouseMultiplier, -paramB * mouseSensitivity * currentMouseMultiplier, 0, 0);
+		mouse_event(MOUSEEVENTF_MOVE, paramA * mouseSpeed * currentMouseMod, -paramB * mouseSpeed * currentMouseMod, 0, 0);
 		break;
 	case SCROLL:
-		mouse_event(MOUSEEVENTF_HWHEEL, 0, 0, paramA * scrollSensitivity * currentScrollMultiplier, 0);
-		mouse_event(MOUSEEVENTF_WHEEL, 0, 0, paramB * scrollSensitivity * currentScrollMultiplier, 0);
-		break;
-	
-	// trigger controls
-	case SPEED_UP_MOUSE:
-		currentMouseMultiplier = 1 + paramA * (mouseSpeedMultiplier - 1);
-		break;
-	case SPEED_UP_SCROLL:
-		currentScrollMultiplier = 1 + paramA * (scrollSpeedMultiplier - 1);
+		mouse_event(MOUSEEVENTF_HWHEEL, 0, 0, paramA * scrollSpeed * currentScrollMod, 0);
+		mouse_event(MOUSEEVENTF_WHEEL, 0, 0, paramB * scrollSpeed * currentScrollMod, 0);
 		break;
 
-	// button controls
+		// trigger controls
+	case SPEED_UP_MOUSE:
+		currentMouseMod = 1 + paramA * (mouseMod - 1);
+		break;
+	case SPEED_UP_SCROLL:
+		currentScrollMod = 1 + paramA * (scrollMod - 1);
+		break;
+
+		// button controls
 	case LEFT_CLICK:
 		if (paramA > 0)
 			mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);

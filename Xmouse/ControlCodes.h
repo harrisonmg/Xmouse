@@ -2,8 +2,9 @@
 #define CONTROL_CODES
 
 // number of controls
-#define CONTROL_COUNT		16
+#define CONTROL_COUNT		20
 
+// index codes for gamepad controls
 #define LEFT_STICK			0
 #define RIGHT_STICK			1
 
@@ -22,6 +23,11 @@
 #define RIGHT_BUMPER		13
 #define START				14
 #define SELECT				15
+
+#define MOUSE_SPEED			16
+#define MOUSE_MODIFIER		17
+#define SCROLL_SPEED		18
+#define SCROLL_MODIFIER		19
 
 // index codes for computer controls
 #define NO_CONTROL			0

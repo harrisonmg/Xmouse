@@ -118,7 +118,7 @@ purpose:	sets deadzones for the gamepad sticks based on their resting positions
 void Gamepad::setDeadzones()
 {
 	::MessageBox(mainWnd, L"Please put your analogue sticks in their resting positions and press \"OK\".", L"Setting Stick Deadzones", MB_OK);
-	
+
 
 	ZeroMemory(&state, sizeof(XINPUT_STATE));
 	if (XInputGetState(controllerId, &state) != ERROR_SUCCESS)
@@ -179,8 +179,11 @@ fucntion:	listen()
 
 purpose:	listen for gamepad input and take appropriate actions
 */
-void Gamepad::stickListen(Gamepad *gpad)
+void Gamepad::stickListen(listenerArgs *largs)
 {
+	Gamepad *gpad = largs->gpad;
+	bool *threadEnd = largs->threadEnd;
+
 	float leftTrigger, rightTrigger;
 	bool leftZeroed = FALSE, rightZeroed = FALSE;
 	float normLX, normLY, leftStickX, leftStickY;
@@ -188,11 +191,11 @@ void Gamepad::stickListen(Gamepad *gpad)
 	// shortening 
 	int sleepTime, altSleepTime = 5;
 
-	while (TRUE)
+	while (!*threadEnd)
 	{
 		gpad->refresh();
 		sleepTime = 10;
-		
+
 		// get trigger positions (float 0-1)
 		// these must be input before the sticks in order for the modifiers to be set
 		leftTrigger = (float)gpad->state.Gamepad.bLeftTrigger / 255;
@@ -254,13 +257,16 @@ void Gamepad::stickListen(Gamepad *gpad)
 	}
 }
 
-void Gamepad::buttonListen(Gamepad *gpad)
+void Gamepad::buttonListen(listenerArgs *largs)
 {
+	Gamepad *gpad = largs->gpad;
+	bool *threadEnd = largs->threadEnd;
+	
 	WORD prevButtons = 0, curButtons = 0;
 
 	std::wstringstream wss(L"");
 
-	while (TRUE)
+	while (!*threadEnd)
 	{
 		gpad->refresh();
 		curButtons = gpad->state.Gamepad.wButtons;
