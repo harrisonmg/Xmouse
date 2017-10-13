@@ -1,4 +1,6 @@
 # Xmouse
+## NOTICE:
+Temporarily removed release as full dependencies are not yet build in
 ## What Is It
 Xmouse is a Windows program that allows a user to map functions of the mouse and keyboard to a gamepad.
 
