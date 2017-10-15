@@ -117,7 +117,7 @@ purpose:	sets deadzones for the gamepad sticks based on their resting positions
 */
 void Gamepad::setDeadzones()
 {
-	::MessageBox(mainWnd, L"Please put your analogue sticks in their resting positions and press \"OK\".", L"Setting Stick Deadzones", MB_OK);
+	::MessageBox(mainWnd, L"Please put your analog sticks in their resting positions and press \"OK\".", L"Setting Stick Deadzones", MB_OK);
 
 
 	ZeroMemory(&state, sizeof(XINPUT_STATE));
