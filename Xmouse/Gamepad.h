@@ -10,33 +10,33 @@ class Gamepad
 {
 private:
 
-	HWND mainWnd;
-	ControlProfile *ctrlProf;
-	static std::map<WORD, int> XinputButtons;
+    HWND mainWnd;
+    ControlProfile *ctrlProf;
+    static std::map<WORD, int> XinputButtons;
 
-	std::wstring iniPath;
+    std::wstring iniPath;
 
-	XINPUT_STATE state;
-	int controllerId;
+    XINPUT_STATE state;
+    int controllerId;
 
-	float deadzoneLX, deadzoneLY, deadzoneRX, deadzoneRY;
+    float deadzoneLX, deadzoneLY, deadzoneRX, deadzoneRY;
 
 public:
 
-	Gamepad(HWND, ControlProfile*, std::wstring);
+    Gamepad(HWND, ControlProfile*, std::wstring);
 
-	struct listenerArgs
-	{
-		bool* threadEnd;
-		Gamepad* gpad;
-	};
-	
-	void checkConnection();
-	static void stickListen(listenerArgs*);
-	static void buttonListen(listenerArgs*);
-	void setDeadzones();
-	int getControllerId();
-	bool refresh();
+    struct listenerArgs
+    {
+        bool* threadEnd;
+        Gamepad* gpad;
+    };
+    
+    void checkConnection();
+    static void stickListen(listenerArgs*);
+    static void buttonListen(listenerArgs*);
+    void setDeadzones();
+    int getControllerId();
+    bool refresh();
 };
 
 #endif
